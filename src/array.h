@@ -3,14 +3,13 @@
 
 #define INITIAL_CAP 32
 
-typedef struct array array_t;
-struct array
+typedef struct array_t
 {
   void * mem;
   size_t len;
   size_t cap;
   size_t elt_sz;
-};
+} array_t;
 
 static inline array_t *array_new(size_t elt_sz)
 {

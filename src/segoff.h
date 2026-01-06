@@ -1,12 +1,11 @@
 #pragma once
 #include "header.h"
 
-typedef struct segoff segoff_t;
-struct segoff
+typedef struct segoff_t
 {
   uint16_t seg;
   uint16_t off;
-};
+} segoff_t;
 
 static segoff_t parse_segoff(const char *s)
 {

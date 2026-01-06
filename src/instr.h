@@ -3,14 +3,6 @@
 
 #define OPERAND_MAX 3
 
-typedef struct operand       operand_t;
-typedef struct operand_reg   operand_reg_t;
-typedef struct operand_mem   operand_mem_t;
-typedef struct operand_imm   operand_imm_t;
-typedef struct operand_rel   operand_rel_t;
-typedef struct operand_far   operand_far_t;
-typedef struct instr_fmt     instr_fmt_t;
-
 #define REGISTER_ARRAY(_)\
   /* Standard 16-bit registers */ \
   _( REG_AX,    16, "ax",    "AX"    )\
@@ -80,10 +72,10 @@ enum {
   OPERAND_TYPE_FAR,
 };
 
-struct operand_reg
+typedef struct operand_reg_t
 {
   int id;
-};
+} operand_reg_t;
 
 enum {
   SIZE_8,
@@ -91,33 +83,33 @@ enum {
   SIZE_32,
 };
 
-struct operand_mem
+typedef struct operand_mem_t
 {
   int sz;   // SIZE_
   int sreg; // always must be populated
   int reg1; // 0 if unused
   int reg2; // 0 if unused
   uint16_t off;  // 0 if unused
-};
+} operand_mem_t;
 
-struct operand_imm
+typedef struct operand_imm_t
 {
   int sz;
   uint16_t val;
-};
+} operand_imm_t;
 
-struct operand_rel
+typedef struct operand_rel_t
 {
   uint16_t val;
-};
+} operand_rel_t;
 
-struct operand_far
+typedef struct operand_far_t
 {
   uint16_t seg;
   uint16_t off;
-};
+} operand_far_t;
 
-struct operand
+typedef struct operand_t
 {
   int type;
   union {
@@ -127,7 +119,7 @@ struct operand
     operand_rel_t rel;
     operand_far_t far;
   } u;
-};
+} operand_t;
 
 enum {
   REP_NONE = 0,
@@ -135,7 +127,7 @@ enum {
   REP_E,
 };
 
-struct dis86_instr
+typedef struct dis86_instr
 {
   int       rep;
   int       opcode;
@@ -143,11 +135,11 @@ struct dis86_instr
   size_t    addr;
   size_t    n_bytes;
   int       intel_hidden;   /* bitmap of operands hidden in intel assembly */
-};
+} dis86_instr_t;
 
 const char *instr_op_mneumonic(int op);
 
-struct instr_fmt
+typedef struct instr_fmt_t
 {
   int op;             /* OP_ */
   int opcode1;        /* first byte: opcode */
@@ -156,6 +148,6 @@ struct instr_fmt
   int operand2;       /* OPER_ */
   int operand3;       /* OPER_ */
   int intel_hidden;   /* bitmap of operands hidden in intel assembly */
-};
+} instr_fmt_t;
 
 int instr_fmt_lookup(int opcode1, int opcode2, instr_fmt_t **fmt);

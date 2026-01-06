@@ -1,4 +1,5 @@
 #pragma once
+#include "dis86.h"
 
 typedef struct meh                 meh_t;
 typedef struct expr                expr_t;
