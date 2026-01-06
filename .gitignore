@@ -1,7 +1,3 @@
-*~
-\#*#
-*.dSYM/
-.DS_Store
-old/v1
-/target
-/Cargo.lock
+dis86_config.bsl
+run.sh
+CMakeList.txt.*
