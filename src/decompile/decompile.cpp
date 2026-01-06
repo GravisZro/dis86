@@ -37,7 +37,7 @@ static decompiler_t * decompiler_new( dis86_t *                  dis,
                                       size_t                     n_ins )
 
 {
-  decompiler_t *d = calloc(1, sizeof(decompiler_t));
+  decompiler_t *d = (decompiler_t*)calloc(1, sizeof(decompiler_t));
   d->dis = dis;
   d->cfg = opt_cfg;
   if (!d->cfg) {
@@ -321,17 +321,17 @@ static void decompiler_emit_expr(decompiler_t *d, expr_t *expr, str_t *ret_s)
     } break;
     case EXPR_KIND_OPERATOR1: {
       expr_operator1_t *k = expr->k.operator1;
-      assert(!k->operator.sign); // not sure what this would mean...
+      assert(!k->op.sign); // not sure what this would mean...
       value_str(&k->dest, s, true);
-      str_fmt(s, " %s ", k->operator);
+      str_fmt(s, " %s ", k->op);
       str_fmt(s, ";");
     } break;
     case EXPR_KIND_OPERATOR2: {
       expr_operator2_t *k = expr->k.operator2;
-      if (k->operator.sign) str_fmt(s, "(int16_t)");
+      if (k->op.sign) str_fmt(s, "(int16_t)");
       value_str(&k->dest, s, true);
-      str_fmt(s, " %s ", k->operator);
-      if (k->operator.sign) str_fmt(s, "(int16_t)");
+      str_fmt(s, " %s ", k->op);
+      if (k->op.sign) str_fmt(s, "(int16_t)");
       value_str(&k->src, s, false);
       str_fmt(s, ";");
     } break;
@@ -339,10 +339,10 @@ static void decompiler_emit_expr(decompiler_t *d, expr_t *expr, str_t *ret_s)
       expr_operator3_t *k = expr->k.operator3;
       value_str(&k->dest, s, true);
       str_fmt(s, " = ");
-      if (k->operator.sign) str_fmt(s, "(int16_t)");
+      if (k->op.sign) str_fmt(s, "(int16_t)");
       value_str(&k->left, s, false);
-      str_fmt(s, " %s ", k->operator);
-      if (k->operator.sign) str_fmt(s, "(int16_t)");
+      str_fmt(s, " %s ", k->op);
+      if (k->op.sign) str_fmt(s, "(int16_t)");
       value_str(&k->right, s, false);
       str_fmt(s, ";");
     } break;
@@ -362,10 +362,10 @@ static void decompiler_emit_expr(decompiler_t *d, expr_t *expr, str_t *ret_s)
     case EXPR_KIND_BRANCH_COND: {
       expr_branch_cond_t *k = expr->k.branch_cond;
       str_fmt(s, "if (");
-      if (k->operator.sign) str_fmt(s, "(int16_t)");
+      if (k->op.sign) str_fmt(s, "(int16_t)");
       value_str(&k->left, s, false);
-      str_fmt(s, " %s ", k->operator);
-      if (k->operator.sign) str_fmt(s, "(int16_t)");
+      str_fmt(s, " %s ", k->op);
+      if (k->op.sign) str_fmt(s, "(int16_t)");
       value_str(&k->right, s, false);
       str_fmt(s, ") goto label_%08x;", k->target);
     } break;
@@ -385,10 +385,10 @@ static void decompiler_emit_expr(decompiler_t *d, expr_t *expr, str_t *ret_s)
         str_fmt(s, "CALL_FUNC(%s);", k->func->name);
       } else {
         switch (k->addr.type) {
-          case ADDR_TYPE_FAR: {
+          case addr_type_e::ADDR_TYPE_FAR: {
             str_fmt(s, "CALL_FAR(0x%04x, 0x%04x);", k->addr.u.far.seg, k->addr.u.far.off);
           } break;
-          case ADDR_TYPE_NEAR: {
+          case addr_type_e::ADDR_TYPE_NEAR: {
             str_fmt(s, "CALL_NEAR(0x%04x);", k->addr.u.near);
           } break;
           default: {

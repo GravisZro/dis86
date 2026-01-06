@@ -12,7 +12,7 @@ struct str
 
 static inline void str_init(str_t *s)
 {
-  s->buf = malloc(4);
+  s->buf = (char*)malloc(4);
   s->idx = 0;
   s->len = 4;
 }
@@ -50,7 +50,7 @@ static inline void str_fmt(str_t *s, const char *fmt, ...)
 
     /* resize */
     s->len *= 2;
-    s->buf = realloc(s->buf, s->len);
+    s->buf = (char*)realloc(s->buf, s->len);
     if (s->buf == NULL) FAIL("Failed to realloc buffer");
   }
 }

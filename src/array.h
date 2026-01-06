@@ -3,17 +3,17 @@
 
 #define INITIAL_CAP 32
 
-typedef struct array_t
+struct array_t
 {
   void * mem;
   size_t len;
   size_t cap;
   size_t elt_sz;
-} array_t;
+};
 
 static inline array_t *array_new(size_t elt_sz)
 {
-  array_t *arr = calloc(1, sizeof(array_t));
+  array_t *arr = (array_t *)calloc(1, sizeof(array_t));
   arr->mem = malloc(INITIAL_CAP * elt_sz);
   arr->len = 0;
   arr->cap = INITIAL_CAP;

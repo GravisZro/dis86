@@ -32,8 +32,7 @@ static bool cmdarg_segoff(int * argc, char *** argv, const char * name, segoff_t
   return true;
 }
 
-typedef struct options options_t;
-struct options
+struct options_t
 {
   const char * config;
   const char * binary;
@@ -96,7 +95,7 @@ static int run(options_t *opt)
     dis86_instr_t *ins = dis86_next(d);
     if (!ins) break;
 
-    dis86_instr_t *ins_ptr = array_append_dst(ins_arr);
+    dis86_instr_t *ins_ptr = (dis86_instr_t*)array_append_dst(ins_arr);
     dis86_instr_copy(ins_ptr, ins);
   }
 

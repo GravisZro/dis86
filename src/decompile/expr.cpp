@@ -7,8 +7,8 @@ static size_t _impl_operator1(expr_t *expr, symbols_t *symbols, dis86_instr_t *i
 
   expr->kind = EXPR_KIND_OPERATOR1;
   expr_operator1_t *k = expr->k.operator1;
-  k->operator.oper = _oper;
-  k->operator.sign = _sign;
+  k->op.oper = _oper;
+  k->op.sign = _sign;
   k->dest     = value_from_operand(&ins->operand[0], symbols);
 
   return 1;
@@ -22,8 +22,8 @@ static size_t _impl_operator2(expr_t *expr, symbols_t *symbols, dis86_instr_t *i
 
   expr->kind = EXPR_KIND_OPERATOR2;
   expr_operator2_t *k = expr->k.operator2;
-  k->operator.oper = _oper;
-  k->operator.sign = _sign;
+  k->op.oper = _oper;
+  k->op.sign = _sign;
   k->dest     = value_from_operand(&ins->operand[0], symbols);
   k->src      = value_from_operand(&ins->operand[1], symbols);
 
@@ -39,8 +39,8 @@ static size_t _impl_operator3(expr_t *expr, symbols_t *symbols, dis86_instr_t *i
 
   expr->kind = EXPR_KIND_OPERATOR3;
   expr_operator3_t *k = expr->k.operator3;
-  k->operator.oper = _oper;
-  k->operator.sign = _sign;
+  k->op.oper = _oper;
+  k->op.sign = _sign;
   k->dest     = value_from_operand(&ins->operand[0], symbols);
   k->left     = value_from_operand(&ins->operand[1], symbols);
   k->right    = value_from_operand(&ins->operand[2], symbols);
@@ -127,7 +127,7 @@ static size_t _impl_abstract_jump(expr_t *expr, symbols_t *symbols, dis86_instr_
 /*   STOPPED_HERE; */
 /* } */
 
-static size_t _impl_call_far(expr_t *expr, config_t *cfg, symbols_t *symbols, dis86_instr_t *ins)
+static size_t _impl_call_far(expr_t *expr, dis86_decompile_config_t *cfg, symbols_t *symbols, dis86_instr_t *ins)
 {
   // FIXME BROKEN!!!
   if (ins->operand[0].type != OPERAND_TYPE_FAR) {
@@ -142,7 +142,7 @@ static size_t _impl_call_far(expr_t *expr, config_t *cfg, symbols_t *symbols, di
 
   expr->kind = EXPR_KIND_CALL;
   expr_call_t *k = expr->k.call;
-  k->addr.type  = ADDR_TYPE_FAR;
+  k->addr.type  = addr_type_e::ADDR_TYPE_FAR;
   k->addr.u.far = addr;
   k->remapped   = remapped;
   k->func       = func;
@@ -151,7 +151,7 @@ static size_t _impl_call_far(expr_t *expr, config_t *cfg, symbols_t *symbols, di
 }
 
 static size_t _impl_call_near(uint16_t seg, expr_t *expr,
-                              config_t *cfg, symbols_t *symbols, dis86_instr_t *ins)
+                              dis86_decompile_config_t *cfg, symbols_t *symbols, dis86_instr_t *ins)
 {
   if (ins->operand[0].type != OPERAND_TYPE_REL) {
     expr->kind = EXPR_KIND_UNKNOWN;
@@ -168,7 +168,7 @@ static size_t _impl_call_near(uint16_t seg, expr_t *expr,
 
   expr->kind = EXPR_KIND_CALL;
   expr_call_t *k = expr->k.call;
-  k->addr.type   = ADDR_TYPE_NEAR;
+  k->addr.type   = addr_type_e::ADDR_TYPE_NEAR;
   k->addr.u.near = effective;
   k->remapped    = false;
   k->func        = func;
@@ -189,8 +189,8 @@ static size_t _impl_load_effective_addr(expr_t *expr, symbols_t *symbols, dis86_
 
   expr->kind = EXPR_KIND_OPERATOR3;
   expr_operator3_t *k = expr->k.operator3;
-  k->operator.oper = "-";
-  k->operator.sign = 0;
+  k->op.oper = "-";
+  k->op.sign = 0;
   k->dest = value_from_operand(&ins->operand[0], symbols);
   k->left = value_from_symref(symbols_find_reg(symbols, mem->reg1));
   k->right = value_from_imm(-(int16_t)mem->off);
@@ -210,7 +210,7 @@ static size_t _impl_load_effective_addr(expr_t *expr, symbols_t *symbols, dis86_
 #define CALL_NEAR()              _impl_call_near(seg, expr, cfg, symbols, ins)
 #define LOAD_EFFECTIVE_ADDR()    _impl_load_effective_addr(expr, symbols, ins)
 
-static size_t extract_expr(uint16_t seg, expr_t *expr, config_t *cfg, symbols_t *symbols,
+static size_t extract_expr(uint16_t seg, expr_t *expr, dis86_decompile_config_t *cfg, symbols_t *symbols,
                            dis86_instr_t *ins, size_t n_ins)
 {
   switch (ins->opcode) {
@@ -338,9 +338,9 @@ value_t expr_destination(expr_t *expr)
   }
 }
 
-meh_t * meh_new(config_t *cfg, symbols_t *symbols, uint16_t seg, dis86_instr_t *ins, size_t n_ins)
+meh_t * meh_new(dis86_decompile_config_t *cfg, symbols_t *symbols, uint16_t seg, dis86_instr_t *ins, size_t n_ins)
 {
-  meh_t *m = calloc(1, sizeof(meh_t));
+  meh_t *m = (meh_t*)calloc(1, sizeof(meh_t));
 
   while (n_ins) {
     assert(m->expr_len < ARRAY_SIZE(m->expr_arr));

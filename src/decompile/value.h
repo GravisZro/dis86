@@ -1,9 +1,8 @@
 #pragma once
 
-typedef struct value     value_t;
-typedef struct value_sym value_sym_t;
-typedef struct value_mem value_mem_t;
-typedef struct value_imm value_imm_t;
+#include "symbols.h"
+
+#include <cstdint>
 
 enum {
   VALUE_TYPE_NONE = 0,
@@ -12,12 +11,12 @@ enum {
   VALUE_TYPE_IMM,
 };
 
-struct value_sym
+struct value_sym_t
 {
   symref_t ref;
 };
 
-struct value_mem
+struct value_mem_t
 {
   // TODO: Remove 8086-isms and dis86-isms
   int        sz; // SIZE_*
@@ -27,14 +26,14 @@ struct value_mem
   uint16_t        off;
 };
 
-struct value_imm
+struct value_imm_t
 {
   // TODO: Remove 8086-isms and dis86-isms
   int sz; // SIZE_*
   uint16_t value;
 };
 
-struct value
+struct value_t
 {
   int type;
   union {

@@ -6,16 +6,12 @@
 
 #define HAX_FAIL(...) do { fprintf(stderr, "FAIL (%s:%d): ", __FUNCTION__, __LINE__); fprintf(stderr, __VA_ARGS__); fprintf(stderr, "\n"); abort(); } while(0)
 
-typedef struct bsl_parser  bsl_parser_t;
-typedef struct bsl_keyval  bsl_keyval_t;
-typedef struct bsl_node    bsl_node_t;
-
 enum {
   TOKEN_EOF = 256,
   TOKEN_STR,
 };
 
-struct bsl_parser
+struct bsl_parser_t
 {
   const char * buf;
   size_t       sz;
@@ -112,20 +108,20 @@ static void bsl_parser_tok_next(bsl_parser_t *p)
 
 static char *bsl_parser_tok_str(bsl_parser_t *p)
 {
-  char *s = malloc(p->tok_len+1);
+  char *s = (char*)malloc(p->tok_len+1);
   memcpy(s, p->tok_buf, p->tok_len);
   s[p->tok_len] = '\0';
   return s;
 }
 
-struct bsl_keyval
+struct bsl_keyval_t
 {
   int    type; // BSL_TYPE_*
   char * key;
   void * val;
 };
 
-struct bsl_node
+struct bsl_node_t
 {
   bsl_keyval_t * kv_arr;
   size_t         kv_len;
@@ -135,12 +131,12 @@ struct bsl_node
 
 static bsl_node_t * bsl_node_new(void)
 {
-  bsl_node_t *n = malloc(sizeof(bsl_node_t));
+  bsl_node_t *n = (bsl_node_t*)malloc(sizeof(bsl_node_t));
   if (!n) return NULL;
 
   n->kv_len = 0;
   n->kv_cap = 8;
-  n->kv_arr = malloc(n->kv_cap * sizeof(bsl_keyval_t));
+  n->kv_arr = (bsl_keyval_t*)malloc(n->kv_cap * sizeof(bsl_keyval_t));
   n->toplevel = 0;
 
   if (!n->kv_arr) {
@@ -169,7 +165,7 @@ static void bsl_node_append(bsl_node_t *n, bsl_keyval_t kv /* value moved into t
 {
   if (n->kv_len == n->kv_cap) { // realloc?
     n->kv_cap *= 2;
-    n->kv_arr = realloc(n->kv_arr, n->kv_cap * sizeof(bsl_keyval_t));
+    n->kv_arr = (bsl_keyval_t*)realloc(n->kv_arr, n->kv_cap * sizeof(bsl_keyval_t));
     if (!n->kv_arr) HAX_FAIL("CANNOT REALLOC");
   }
 
@@ -307,7 +303,7 @@ void * bsl_get_generic(bsl_t *bsl, const char *key, int *opt_type)
 const char * bsl_get_str(bsl_t *bsl, const char *key)
 {
   int type = -1;
-  const char * val = bsl_get_generic(bsl, key, &type);
+  const char * val = (const char *)bsl_get_generic(bsl, key, &type);
   if (!val || type != BSL_TYPE_STR) return NULL;
   return val;
 }
@@ -315,7 +311,7 @@ const char * bsl_get_str(bsl_t *bsl, const char *key)
 bsl_t * bsl_get_node(bsl_t *bsl, const char *key)
 {
   int type = -1;
-  bsl_t * val = bsl_get_generic(bsl, key, &type);
+  bsl_t * val = (bsl_t*)bsl_get_generic(bsl, key, &type);
   if (!val || type != BSL_TYPE_NODE) return NULL;
   return val;
 }

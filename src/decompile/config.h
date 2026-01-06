@@ -6,7 +6,6 @@
 #define MAX_CONFIG_GLOBALS 1024
 #define MAX_CONFIG_SEGMAPS 1024
 
-typedef struct dis86_decompile_config config_t;
 typedef struct config_func            config_func_t;
 typedef struct config_global          config_global_t;
 typedef struct config_segmap          config_segmap_t;
@@ -34,7 +33,7 @@ struct config_segmap
   uint16_t    to;
 };
 
-struct dis86_decompile_config
+struct dis86_decompile_config_t
 {
   size_t          func_len;
   config_func_t   func_arr[MAX_CONFIG_FUNCS];
@@ -46,10 +45,10 @@ struct dis86_decompile_config
   config_segmap_t segmap_arr[MAX_CONFIG_SEGMAPS];
 };
 
-config_t *      config_read_new(const char *path);
-config_t *      config_default_new(void);
-void            config_delete(config_t *cfg);
+dis86_decompile_config_t *      config_read_new(const char *path);
+dis86_decompile_config_t *      config_default_new(void);
+void            config_delete(dis86_decompile_config_t *cfg);
 
-void            config_print(config_t *cfg);
-config_func_t * config_func_lookup(config_t *cfg, segoff_t s);
-bool            config_seg_remap(config_t *cfg, uint16_t *inout_seg);
+void            config_print(dis86_decompile_config_t *cfg);
+config_func_t * config_func_lookup(dis86_decompile_config_t *cfg, segoff_t s);
+bool            config_seg_remap(dis86_decompile_config_t *cfg, uint16_t *inout_seg);

@@ -24,7 +24,7 @@ static inline char *read_file(const char *filename, size_t *out_sz)
   size_t file_sz = ftell(fp);
   fseek(fp, 0, SEEK_SET);
 
-  char *mem = malloc(file_sz);
+  char *mem = (char*)malloc(file_sz);
   if (!mem) FAIL("Failed to allocate");
 
   size_t n = fread(mem, 1, file_sz, fp);

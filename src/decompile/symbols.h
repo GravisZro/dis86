@@ -1,14 +1,12 @@
 #pragma once
 
+#include <cstdint>
+#include <unistd.h>
+
 #define NAME_MAX 128
 
-typedef struct sym         sym_t;
-typedef struct symref      symref_t;
-typedef struct symbols     symbols_t;
-typedef struct symtab      symtab_t;
-typedef struct symtab_iter symtab_iter_t;
 
-struct __attribute__((aligned(16))) symtab_iter { char _opaque[32]; };
+struct __attribute__((aligned(16))) symtab_iter_t { char _opaque[32]; };
 
 enum {
   SYM_KIND_REGISTER,
@@ -17,7 +15,7 @@ enum {
   SYM_KIND_GLOBAL,
 };
 
-struct sym
+struct sym_t
 {
   int          kind;
   int16_t          off;
@@ -25,12 +23,30 @@ struct sym
   const char * name;             // optional (default name is constructed otherwise)
 };
 
+
+#define SYMTAB_MAX_SIZE 4096
+
+struct symtab_t
+{
+  // TODO: REPLACE WITH A HASHTABLE
+  size_t n_var;
+  sym_t var[SYMTAB_MAX_SIZE];
+};
+
+struct symref_t
+{
+  sym_t * symbol;  // NULL if the ref doesn't point anywhere
+  uint16_t     off;     // offset into this symbol
+  uint16_t     len;     // length from the offset
+};
+
+
 bool         sym_deduce(sym_t *v, operand_mem_t *mem);
 bool         sym_deduce_reg(sym_t *sym, int reg_id);
 const char * sym_name(sym_t *v, char *buf, size_t buf_sz);
 size_t       sym_size_bytes(sym_t *v);
 
-struct symbols
+struct symbols_t
 {
   symtab_t * registers;
   symtab_t * globals;
@@ -45,13 +61,6 @@ symref_t    symbols_find_ref(symbols_t *s, sym_t *deduced_sym);
 symref_t    symbols_find_mem(symbols_t *s, operand_mem_t *mem);
 symref_t    symbols_find_reg(symbols_t *s, int reg_id);
 void        symbols_add_global(symbols_t *s, const char *name, uint16_t offset, uint16_t len);
-
-struct symref
-{
-  sym_t * symbol;  // NULL if the ref doesn't point anywhere
-  uint16_t     off;     // offset into this symbol
-  uint16_t     len;     // length from the offset
-};
 
 bool symref_matches(symref_t *a, symref_t *b);
 

@@ -1,6 +1,6 @@
-#pragma once
+#ifndef DIS86_PRIVATE_H
+#define DIS86_PRIVATE_H
 
-#include "dis86.h"
 #include "header.h"
 #include "binary.h"
 #include "instr.h"
@@ -11,8 +11,10 @@ enum {
   RESULT_NOT_FOUND,
 };
 
-struct dis86
+struct dis86_t
 {
   binary_t b[1];
   dis86_instr_t ins[1];
 };
+
+#endif

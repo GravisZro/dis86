@@ -1,18 +1,18 @@
-#pragma once
+#ifndef DIS86_H
+#define DIS86_H
+
 #include <stdlib.h>
 #include <stdbool.h>
 #include <unistd.h>
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "dis86_private.h"
+#include "decompile/config.h"
 
 /*****************************************************************/
 /* CORE TYPES */
 /*****************************************************************/
-typedef struct dis86        dis86_t;
-typedef struct dis86_instr  dis86_instr_t;
+
 
 /*****************************************************************/
 /* CORE ROUTINES */
@@ -60,8 +60,6 @@ char *dis86_print_intel_syntax(dis86_t *d, dis86_instr_t *ins, bool with_detail)
 /* DECOMPILE ROUTINES */
 /*****************************************************************/
 
-/* Configuration info for decompiler */
-typedef struct dis86_decompile_config dis86_decompile_config_t;
 
 /* Construct a config from file */
 dis86_decompile_config_t * dis86_decompile_config_read_new(const char *path);
@@ -75,6 +73,5 @@ char *dis86_decompile( dis86_t *                  dis,
                        dis86_instr_t *            ins,
                        size_t                     n_ins );
 
-#ifdef __cplusplus
-}
+
 #endif

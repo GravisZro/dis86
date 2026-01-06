@@ -63,21 +63,21 @@ static inline char *parse_name(parser_t *p)
   parse_tok(p, &tok, &tok_len);
   if (tok_len == 0) FAIL("Reached end while parsing name in line: '%s'", p->line);
 
-  char *s = malloc(tok_len+1);
+  char *s = (char*)malloc(tok_len+1);
   memcpy(s, tok, tok_len);
   s[tok_len] = '\0';
   return s;
 }
 
-static inline int parse_type(parser_t *p)
+static inline datamap_type_e parse_type(parser_t *p)
 {
   const char *tok;
   size_t tok_len;
   parse_tok(p, &tok, &tok_len);
   if (tok_len == 0) FAIL("Reached end while parsing type in line: '%s'", p->line);
 
-  if (tok_len == 2 && 0 == memcmp(tok, "uint8_t", 2))  return DATAMAP_TYPE_U8;
-  else if (tok_len == 3 && 0 == memcmp(tok, "uint16_t", 3)) return DATAMAP_TYPE_U16;
+  if (tok_len == 2 && 0 == memcmp(tok, "uint8_t", 2))  return datamap_type_e::DATAMAP_TYPE_U8;
+  else if (tok_len == 3 && 0 == memcmp(tok, "uint16_t", 3)) return datamap_type_e::DATAMAP_TYPE_U16;
   else FAIL("Unknown type '%.*s' in line: '%s'", (int)tok_len, tok, p->line);
 }
 
@@ -120,7 +120,7 @@ static inline datamap_entry_t *entry_begin(datamap_t *d, size_t *_cap)
   size_t cap = *_cap;
   if (d->n_entries+1 > cap) {
     cap *= 2;
-    d->entries = realloc(d->entries, cap * sizeof(datamap_entry_t));
+    d->entries = (datamap_entry_t*)realloc(d->entries, cap * sizeof(datamap_entry_t));
     *_cap = cap;
   }
   return &d->entries[d->n_entries];
@@ -136,8 +136,8 @@ datamap_t *datamap_load_from_mem(const char *str, size_t n)
 {
   size_t cap = INITIAL_CAP;
 
-  datamap_t *d = calloc(1, sizeof(datamap_t));
-  d->entries = malloc(cap * sizeof(datamap_entry_t));
+  datamap_t *d = (datamap_t*)calloc(1, sizeof(datamap_t));
+  d->entries = (datamap_entry_t*)malloc(cap * sizeof(datamap_entry_t));
   d->n_entries = 0;
 
 

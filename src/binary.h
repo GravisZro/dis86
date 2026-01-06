@@ -1,7 +1,6 @@
 #include "header.h"
 
-typedef struct binary binary_t;
-struct binary
+struct binary_t
 {
   uint8_t *   mem;
   size_t len;
@@ -11,7 +10,7 @@ struct binary
 
 static inline void binary_init(binary_t *b, size_t base_addr, char *mem, size_t len)
 {
-  b->mem = malloc(len);
+  b->mem = (uint8_t*)malloc(len);
   memcpy(b->mem, mem, len);
   b->len = len;
   b->idx = base_addr;

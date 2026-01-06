@@ -126,7 +126,7 @@ static bool sym_overlaps(sym_t *a, sym_t *b)
 
 symbols_t * symbols_new(void)
 {
-  symbols_t *s = calloc(1, sizeof(symbols_t));
+  symbols_t *s = (symbols_t*)calloc(1, sizeof(symbols_t));
   s->registers = symtab_new();
   s->globals   = symtab_new();
   s->params    = symtab_new();
@@ -142,18 +142,9 @@ void symbols_delete(symbols_t *s)
   symtab_delete(s->locals);
 }
 
-#define SYMTAB_MAX_SIZE 4096
-
-struct symtab
-{
-  // TODO: REPLACE WITH A HASHTABLE
-  size_t n_var;
-  sym_t var[SYMTAB_MAX_SIZE];
-};
-
 symtab_t * symtab_new(void)
 {
-  symtab_t *s = calloc(1, sizeof(symtab_t));
+  symtab_t *s = (symtab_t*)calloc(1, sizeof(symtab_t));
   s->n_var = 0;
 
   return s;

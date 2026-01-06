@@ -2,15 +2,15 @@
 #include "dis86_private.h"
 #include "bsl/bsl.h"
 
-config_t * config_default_new(void)
+dis86_decompile_config_t * config_default_new(void)
 {
-  config_t * cfg = calloc(1, sizeof(config_t));
+  dis86_decompile_config_t * cfg = (dis86_decompile_config_t*)calloc(1, sizeof(dis86_decompile_config_t));
   return cfg;
 }
 
-config_t * config_read_new(const char *path)
+dis86_decompile_config_t * config_read_new(const char *path)
 {
-  config_t * cfg = calloc(1, sizeof(config_t));
+  dis86_decompile_config_t * cfg = (dis86_decompile_config_t*)calloc(1, sizeof(dis86_decompile_config_t));
 
   size_t sz;
   char * data = read_file(path, &sz);
@@ -106,7 +106,7 @@ config_t * config_read_new(const char *path)
   return cfg;
 }
 
-void config_delete(config_t *cfg)
+void config_delete(dis86_decompile_config_t *cfg)
 {
   if (!cfg) return;
   for (size_t i = 0; i < cfg->func_len; i++) {
@@ -122,7 +122,7 @@ void config_delete(config_t *cfg)
   free(cfg);
 }
 
-void config_print(config_t *cfg)
+void config_print(dis86_decompile_config_t *cfg)
 {
   printf("functions:\n");
   for (size_t i = 0; i < cfg->func_len; i++) {
@@ -143,7 +143,7 @@ void config_print(config_t *cfg)
   }
 }
 
-config_func_t * config_func_lookup(config_t *cfg, segoff_t s)
+config_func_t * config_func_lookup(dis86_decompile_config_t *cfg, segoff_t s)
 {
   for (size_t i = 0; i < cfg->func_len; i++) {
     config_func_t *f = &cfg->func_arr[i];
@@ -154,7 +154,7 @@ config_func_t * config_func_lookup(config_t *cfg, segoff_t s)
   return NULL;
 }
 
-bool config_seg_remap(config_t *cfg, uint16_t *_seg)
+bool config_seg_remap(dis86_decompile_config_t *cfg, uint16_t *_seg)
 {
   uint16_t seg = *_seg;
   for (size_t i = 0; i < cfg->segmap_len; i++) {

@@ -1,35 +1,24 @@
 #pragma once
 #include "dis86.h"
+#include "config.h"
+#include "value.h"
 
-typedef struct meh                 meh_t;
-typedef struct expr                expr_t;
-typedef struct expr_operator1      expr_operator1_t;
-typedef struct expr_operator2      expr_operator2_t;
-typedef struct expr_operator3      expr_operator3_t;
-typedef struct expr_abstract       expr_abstract_t;
-typedef struct expr_branch_cond    expr_branch_cond_t;
-typedef struct expr_branch_flags   expr_branch_flags_t;
-typedef struct expr_branch         expr_branch_t;
-typedef struct expr_call           expr_call_t;
-typedef struct expr_call_with_args expr_call_with_args_t;
-
-enum {
+enum class addr_type_e
+{
   ADDR_TYPE_FAR,
   ADDR_TYPE_NEAR,
 };
 
-typedef struct addr addr_t;
-struct addr
+struct addr_t
 {
-  int type;
+  addr_type_e type;
   union {
     segoff_t far;
     uint16_t      near;
   } u;
 };
 
-typedef struct operator operator_t;
-struct operator
+struct operator_t
 {
   const char * oper;
   int          sign;
@@ -49,28 +38,28 @@ enum {
   EXPR_KIND_CALL_WITH_ARGS,
 };
 
-struct expr_operator1
+struct expr_operator1_t
 {
-  operator_t   operator;
+  operator_t   op;
   value_t      dest;
 };
 
-struct expr_operator2
+struct expr_operator2_t
 {
-  operator_t   operator;
+  operator_t   op;
   value_t      dest;
   value_t      src;
 };
 
-struct expr_operator3
+struct expr_operator3_t
 {
-  operator_t   operator;
+  operator_t   op;
   value_t      dest;
   value_t      left;
   value_t      right;
 };
 
-struct expr_abstract
+struct expr_abstract_t
 {
   const char * func_name;
   value_t      ret;
@@ -78,27 +67,27 @@ struct expr_abstract
   value_t      args[3];
 };
 
-struct expr_branch_cond
+struct expr_branch_cond_t
 {
-  operator_t   operator;
+  operator_t   op;
   value_t      left;
   value_t      right;
   uint32_t          target;
 };
 
-struct expr_branch_flags
+struct expr_branch_flags_t
 {
   const char * op; // FIXME
   value_t      flags;
   uint32_t          target;
 };
 
-struct expr_branch
+struct expr_branch_t
 {
   uint32_t target;
 };
 
-struct expr_call
+struct expr_call_t
 {
   addr_t          addr;
   bool            remapped;
@@ -106,7 +95,7 @@ struct expr_call
 };
 
 #define MAX_ARGS 16
-struct expr_call_with_args
+struct expr_call_with_args_t
 {
   addr_t          addr;
   bool            remapped;
@@ -114,7 +103,7 @@ struct expr_call_with_args
   value_t         args[MAX_ARGS];
 };
 
-struct expr
+struct expr_t
 {
   int kind;
   union {
@@ -141,11 +130,11 @@ value_t expr_destination(expr_t *expr);
   expr; })
 
 #define EXPR_MAX 4096
-struct meh
+struct meh_t
 {
   size_t expr_len;
   expr_t expr_arr[EXPR_MAX];
 };
 
-meh_t * meh_new(config_t *cfg, symbols_t *symbols, uint16_t seg, dis86_instr_t *ins, size_t n_ins);
+meh_t * meh_new(dis86_decompile_config_t *cfg, symbols_t *symbols, uint16_t seg, dis86_instr_t *ins, size_t n_ins);
 void    meh_delete(meh_t *m);

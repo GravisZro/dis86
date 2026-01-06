@@ -1,3 +1,7 @@
+#include <cstdint>
+#include <unistd.h>
+
+#include "instr.h"
 
 #define MAX_LABELS 256
 

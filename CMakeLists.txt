@@ -34,7 +34,7 @@ src/bsl/bsl.h
 )
 
 set(SOURCES_BSL
-src/bsl/bsl.c
+src/bsl/bsl.cpp
 )
 
 set(HEADERS_DECOMPILER
@@ -65,25 +65,25 @@ src/dis86_private.h
 )
 
 set(SOURCES_DECOMPILER
-src/decompile/value.c
-src/decompile/type.c
-src/decompile/expr.c
-src/decompile/symbols.c
-src/decompile/config.c
-src/decompile/decompile.c
-src/decompile/transform.c
+src/decompile/value.cpp
+src/decompile/type.cpp
+src/decompile/expr.cpp
+src/decompile/symbols.cpp
+src/decompile/config.cpp
+src/decompile/decompile.cpp
+src/decompile/transform.cpp
 )
 
 set(SOURCES_DISASSEMBLER
-src/core.c
-src/datamap.c
-src/app/dis86.c
-src/app/exec_mode_dis.c
-src/app/exec_mode_decomp.c
-src/cmdarg/cmdarg.c
-src/print_intel_syntax.c
-src/instr.c
-src/decode.c
+src/core.cpp
+src/datamap.cpp
+src/app/dis86.cpp
+src/app/exec_mode_dis.cpp
+src/app/exec_mode_decomp.cpp
+src/cmdarg/cmdarg.cpp
+src/print_intel_syntax.cpp
+src/instr.cpp
+src/decode.cpp
 )
 
 

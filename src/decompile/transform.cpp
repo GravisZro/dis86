@@ -7,13 +7,13 @@ void transform_pass_xor_rr(meh_t *m)
     if (expr->kind != EXPR_KIND_OPERATOR2) continue;
 
     expr_operator2_t *k = expr->k.operator2;
-    if (0 != memcmp(k->operator.oper, "^=", 2)) continue;
+    if (0 != memcmp(k->op.oper, "^=", 2)) continue;
     if (k->dest.type != VALUE_TYPE_SYM) continue;
     if (k->src.type != VALUE_TYPE_SYM) continue;
     if (!value_matches(&k->dest, &k->src)) continue;
 
     // Rewrite
-    k->operator.oper = "=";
+    k->op.oper = "=";
     k->src = VALUE_IMM(0);
   }
 }
@@ -61,7 +61,7 @@ void transform_pass_cmp_jmp(meh_t *m)
     prev_expr->kind = EXPR_KIND_BRANCH_COND;
     prev_expr->n_ins++;
     expr_branch_cond_t *b = prev_expr->k.branch_cond;
-    b->operator = jump_operation(name);
+    b->op = jump_operation(name);
     b->left     = left;
     b->right    = right;
     b->target   = target;
@@ -87,7 +87,7 @@ void transform_pass_or_jmp(meh_t *m)
     expr_t *prev_expr = &m->expr_arr[i-1];
     if (prev_expr->kind != EXPR_KIND_OPERATOR2) continue;
     expr_operator2_t *p = prev_expr->k.operator2;
-    if (0 != memcmp(p->operator.oper, "|=", 2)) continue;
+    if (0 != memcmp(p->op.oper, "|=", 2)) continue;
     if (!value_matches(&p->dest, &p->src)) continue;
 
     // Save
@@ -98,8 +98,8 @@ void transform_pass_or_jmp(meh_t *m)
     prev_expr->kind = EXPR_KIND_BRANCH_COND;
     prev_expr->n_ins++;
     expr_branch_cond_t *b = prev_expr->k.branch_cond;
-    b->operator.oper = cmp;
-    b->operator.sign = 0;
+    b->op.oper = cmp;
+    b->op.sign = 0;
     b->left     = src;
     b->right    = VALUE_IMM(0);
     b->target   = target;
@@ -141,7 +141,7 @@ void _synthesize_calls_one(meh_t *m, size_t i)
       expr_t *cleanup_expr = &m->expr_arr[i+1];
       if (cleanup_expr->kind != EXPR_KIND_OPERATOR2) return;
       expr_operator2_t *c = cleanup_expr->k.operator2;
-      if (0 != memcmp(c->operator.oper, "+=", 2)) return;
+      if (0 != memcmp(c->op.oper, "+=", 2)) return;
       if (c->dest.type != VALUE_TYPE_SYM) return;
       // FIXME!
       //if (!symref_matches(c->dest.u.sym->ref, symbols_find_reg(symbols, REG_SP))) return;

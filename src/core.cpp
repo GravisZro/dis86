@@ -2,7 +2,7 @@
 
 dis86_t *dis86_new(size_t base_addr, char *mem, size_t mem_sz)
 {
-  dis86_t *d = calloc(1, sizeof(dis86_t));
+  dis86_t *d = (dis86_t*)calloc(1, sizeof(dis86_t));
   binary_init(d->b, base_addr, mem, mem_sz);
   return d;
 }
