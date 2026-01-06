@@ -20,16 +20,16 @@ static void print_operand_intel_syntax(str_t *s, dis86_instr_t *ins, operand_t *
         if (m->reg1) str_fmt(s, "%s", reg_name(m->reg1));
         if (m->reg2) str_fmt(s, "+%s", reg_name(m->reg2));
         if (m->off) {
-          i16 disp = (i16)m->off;
-          if (disp >= 0) str_fmt(s, "+0x%x", (u16)disp);
-          else           str_fmt(s, "-0x%x", (u16)-disp);
+          int16_t disp = (int16_t)m->off;
+          if (disp >= 0) str_fmt(s, "+0x%x", (uint16_t)disp);
+          else           str_fmt(s, "-0x%x", (uint16_t)-disp);
         }
         str_fmt(s, "]");
       }
     } break;
     case OPERAND_TYPE_IMM: str_fmt(s, "0x%x", o->u.imm.val); break;
     case OPERAND_TYPE_REL: {
-      u16 effective = ins->addr + ins->n_bytes + o->u.rel.val;
+      uint16_t effective = ins->addr + ins->n_bytes + o->u.rel.val;
       str_fmt(s, "0x%x", effective);
     } break;
     case OPERAND_TYPE_FAR: str_fmt(s, "0x%x:0x%x", o->u.far.seg, o->u.far.off); break;
@@ -45,7 +45,7 @@ char *dis86_print_intel_syntax(dis86_t *d, dis86_instr_t *ins, bool with_detail)
   if (with_detail) {
     str_fmt(s, "%8zx:\t", ins->addr);
     for (size_t i = 0; i < ins->n_bytes; i++) {
-      u8 b = binary_byte_at(d->b, ins->addr + i);
+      uint8_t b = binary_byte_at(d->b, ins->addr + i);
       str_fmt(s, "%02x ", b);
     }
     size_t used = ins->n_bytes * 3;

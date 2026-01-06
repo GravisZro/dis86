@@ -18,4 +18,4 @@ struct type
 };
 
 bool type_parse(type_t *typ, const char *str);
-u16  type_size(type_t *typ);
+uint16_t  type_size(type_t *typ);

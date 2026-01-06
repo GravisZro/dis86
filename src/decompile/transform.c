@@ -55,7 +55,7 @@ void transform_pass_cmp_jmp(meh_t *m)
     const char * name   = k->op;
     value_t      left   = p->args[0];
     value_t      right  = p->args[1];
-    u32          target = k->target;
+    uint32_t          target = k->target;
 
     // Rewrite
     prev_expr->kind = EXPR_KIND_BRANCH_COND;
@@ -92,7 +92,7 @@ void transform_pass_or_jmp(meh_t *m)
 
     // Save
     value_t src    = p->src;
-    u32     target = k->target;
+    uint32_t     target = k->target;
 
     // Rewrite
     prev_expr->kind = EXPR_KIND_BRANCH_COND;
@@ -146,7 +146,7 @@ void _synthesize_calls_one(meh_t *m, size_t i)
       // FIXME!
       //if (!symref_matches(c->dest.u.sym->ref, symbols_find_reg(symbols, REG_SP))) return;
       if (c->src.type != VALUE_TYPE_IMM) return;
-      u16 val = c->src.u.imm->value;
+      uint16_t val = c->src.u.imm->value;
       if (val != 2*(size_t)func->args) return;
       num_cleanup_ins = 1;
     } else if (func->args == 1) {

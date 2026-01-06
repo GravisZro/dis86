@@ -4,8 +4,8 @@
 typedef struct segoff segoff_t;
 struct segoff
 {
-  u16 seg;
-  u16 off;
+  uint16_t seg;
+  uint16_t off;
 };
 
 static segoff_t parse_segoff(const char *s)
@@ -16,8 +16,8 @@ static segoff_t parse_segoff(const char *s)
   if (!colon) FAIL("Invalid segoff: '%s'", s);
 
   segoff_t ret;
-  ret.seg = parse_hex_u16(s, colon-s);
-  ret.off = parse_hex_u16(colon+1, end-(colon+1));
+  ret.seg = parse_hex_uint16_t(s, colon-s);
+  ret.off = parse_hex_uint16_t(colon+1, end-(colon+1));
   return ret;
 }
 

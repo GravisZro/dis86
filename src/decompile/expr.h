@@ -23,7 +23,7 @@ struct addr
   int type;
   union {
     segoff_t far;
-    u16      near;
+    uint16_t      near;
   } u;
 };
 
@@ -73,7 +73,7 @@ struct expr_abstract
 {
   const char * func_name;
   value_t      ret;
-  u16          n_args;
+  uint16_t          n_args;
   value_t      args[3];
 };
 
@@ -82,19 +82,19 @@ struct expr_branch_cond
   operator_t   operator;
   value_t      left;
   value_t      right;
-  u32          target;
+  uint32_t          target;
 };
 
 struct expr_branch_flags
 {
   const char * op; // FIXME
   value_t      flags;
-  u32          target;
+  uint32_t          target;
 };
 
 struct expr_branch
 {
-  u32 target;
+  uint32_t target;
 };
 
 struct expr_call
@@ -146,5 +146,5 @@ struct meh
   expr_t expr_arr[EXPR_MAX];
 };
 
-meh_t * meh_new(config_t *cfg, symbols_t *symbols, u16 seg, dis86_instr_t *ins, size_t n_ins);
+meh_t * meh_new(config_t *cfg, symbols_t *symbols, uint16_t seg, dis86_instr_t *ins, size_t n_ins);
 void    meh_delete(meh_t *m);

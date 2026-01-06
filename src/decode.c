@@ -2,22 +2,22 @@
 #include "instr_tbl.h"
 
 // Register number to register enum
-static inline int reg8(u8 num)  { assert(num <= 7); return REG_AL + num; }
-static inline int reg16(u8 num) { assert(num <= 7); return REG_AX + num; }
-static inline int sreg16(u8 num) { assert(num <= 3); return REG_ES + num; }
+static inline int reg8(uint8_t num)  { assert(num <= 7); return REG_AL + num; }
+static inline int reg16(uint8_t num) { assert(num <= 7); return REG_AX + num; }
+static inline int sreg16(uint8_t num) { assert(num <= 3); return REG_ES + num; }
 
 // Mode is the 2-bits from [6..7] in the ModRM byte
-static inline u8 modrm_mode(u8 modrm) { return modrm>>6; }
+static inline uint8_t modrm_mode(uint8_t modrm) { return modrm>>6; }
 
 // Reg is the 3-bits from [3..5] in the ModRM byte
-static inline u8 modrm_reg(u8 modrm) { return (modrm>>3)&7; }
+static inline uint8_t modrm_reg(uint8_t modrm) { return (modrm>>3)&7; }
 
 // Opcode2 is the same as the reg-field in the ModRM byte
 // That is: the 3-bits from [3..5] in the ModRM byte
-static inline u8 modrm_op2(u8 modrm) { return (modrm>>3)&7; }
+static inline uint8_t modrm_op2(uint8_t modrm) { return (modrm>>3)&7; }
 
 // RM is the 3-bits from [0..2] in the ModRM byte
-static inline u8 modrm_rm(u8 modrm) { return modrm&7; }
+static inline uint8_t modrm_rm(uint8_t modrm) { return modrm&7; }
 
 static inline operand_t operand_reg(int id)
 {
@@ -27,7 +27,7 @@ static inline operand_t operand_reg(int id)
   return o;
 }
 
-static inline operand_t operand_imm8(u8 val)
+static inline operand_t operand_imm8(uint8_t val)
 {
   operand_t o = {};
   o.type = OPERAND_TYPE_IMM;
@@ -36,7 +36,7 @@ static inline operand_t operand_imm8(u8 val)
   return o;
 }
 
-static inline operand_t operand_imm16(u16 val)
+static inline operand_t operand_imm16(uint16_t val)
 {
   operand_t o = {};
   o.type = OPERAND_TYPE_IMM;
@@ -50,9 +50,9 @@ static inline operand_t operand_rel(binary_t *b, int sz)
   operand_t o = {};
   o.type = OPERAND_TYPE_REL;
   if (sz == SIZE_8) {
-    o.u.rel.val = (i8)binary_fetch_u8(b);
+    o.u.rel.val = (int8_t)binary_fetch_uint8_t(b);
   } else if (sz == SIZE_16) {
-    o.u.rel.val = binary_fetch_u16(b);
+    o.u.rel.val = binary_fetch_uint16_t(b);
   } else {
     FAIL("Invalid size: %d", sz);
   }
@@ -61,8 +61,8 @@ static inline operand_t operand_rel(binary_t *b, int sz)
 
 static inline operand_t operand_far(binary_t *b)
 {
-  u16 off = binary_fetch_u16(b);
-  u16 seg = binary_fetch_u16(b);
+  uint16_t off = binary_fetch_uint16_t(b);
+  uint16_t seg = binary_fetch_uint16_t(b);
 
   operand_t o = {};
   o.type = OPERAND_TYPE_FAR;
@@ -79,14 +79,14 @@ static inline operand_t operand_moff(binary_t *b, int sz, int sreg)
   o.u.mem.sreg = sreg ? sreg : REG_DS;
   o.u.mem.reg1 = REG_INVAL;
   o.u.mem.reg2 = REG_INVAL;
-  o.u.mem.off  = binary_fetch_u16(b);
+  o.u.mem.off  = binary_fetch_uint16_t(b);
   return o;
 }
 
-static inline operand_t _operand_rm(binary_t *b, int sz, u8 modrm, int sreg)
+static inline operand_t _operand_rm(binary_t *b, int sz, uint8_t modrm, int sreg)
 {
-  u8 mode = modrm_mode(modrm);
-  u8 rm = modrm_rm(modrm);
+  uint8_t mode = modrm_mode(modrm);
+  uint8_t rm = modrm_rm(modrm);
 
   // Handle special cases first
   if (mode == 3) { /* Register mode */
@@ -118,8 +118,8 @@ static inline operand_t _operand_rm(binary_t *b, int sz, u8 modrm, int sreg)
 
   // Handle immediate dispacements
   if      (mode == 0)  m->off = 0;  /* none */
-  else if (mode == 1)  m->off = (i8)binary_fetch_u8(b);
-  else if (mode == 2)  m->off = binary_fetch_u16(b);
+  else if (mode == 1)  m->off = (int8_t)binary_fetch_uint8_t(b);
+  else if (mode == 2)  m->off = binary_fetch_uint16_t(b);
 
   // Apply sreg override (if required)
   if (sreg) m->sreg = sreg;
@@ -127,24 +127,24 @@ static inline operand_t _operand_rm(binary_t *b, int sz, u8 modrm, int sreg)
   return o;
 }
 
-static inline operand_t operand_rm8(binary_t *b, u8 modrm, int sreg)  { return _operand_rm(b, SIZE_8, modrm, sreg);  }
-static inline operand_t operand_rm16(binary_t *b, u8 modrm, int sreg) { return _operand_rm(b, SIZE_16, modrm, sreg); }
+static inline operand_t operand_rm8(binary_t *b, uint8_t modrm, int sreg)  { return _operand_rm(b, SIZE_8, modrm, sreg);  }
+static inline operand_t operand_rm16(binary_t *b, uint8_t modrm, int sreg) { return _operand_rm(b, SIZE_16, modrm, sreg); }
 
-static inline operand_t operand_m8(binary_t *b, u8 modrm, int sreg)
+static inline operand_t operand_m8(binary_t *b, uint8_t modrm, int sreg)
 {
   operand_t o = _operand_rm(b, SIZE_8, modrm, sreg);
   if (o.type != OPERAND_TYPE_MEM) FAIL("Register used where memory operand was required");
   return o;
 }
 
-static inline operand_t operand_m16(binary_t *b, u8 modrm, int sreg)
+static inline operand_t operand_m16(binary_t *b, uint8_t modrm, int sreg)
 {
   operand_t o = _operand_rm(b, SIZE_16, modrm, sreg);
   if (o.type != OPERAND_TYPE_MEM) FAIL("Register used where memory operand was required");
   return o;
 }
 
-static inline operand_t operand_m32(binary_t *b, u8 modrm, int sreg)
+static inline operand_t operand_m32(binary_t *b, uint8_t modrm, int sreg)
 {
   operand_t o = _operand_rm(b, SIZE_32, modrm, sreg);
   if (o.type != OPERAND_TYPE_MEM) FAIL("Register used where memory operand was required");
@@ -189,7 +189,7 @@ dis86_instr_t *dis86_next(dis86_t *d)
   int sreg = REG_INVAL;
   int rep = REP_NONE;
   while (1) {
-    int b = binary_peek_u8(d->b);
+    int b = binary_peek_uint8_t(d->b);
 
     if      (b == 0x26) sreg = REG_ES;
     else if (b == 0x2e) sreg = REG_CS;
@@ -200,11 +200,11 @@ dis86_instr_t *dis86_next(dis86_t *d)
     else if (b == 0xf3) rep = REP_E;
     else break; // not a prefix!
 
-    binary_advance_u8(d->b);
+    binary_advance_uint8_t(d->b);
   }
 
   // Now parse the main level1 opcode
-  int opcode1 = binary_fetch_u8(d->b);
+  int opcode1 = binary_fetch_uint8_t(d->b);
   int opcode2 = -1;
 
   instr_fmt_t *fmt = NULL;
@@ -212,7 +212,7 @@ dis86_instr_t *dis86_next(dis86_t *d)
 
   // Need a level 2 opcode to do lookup?
   if (ret == RESULT_NEED_OPCODE2) {
-    u8 b = binary_peek_u8(d->b);
+    uint8_t b = binary_peek_uint8_t(d->b);
     opcode2 = modrm_op2(b);
     ret = instr_fmt_lookup(opcode1, opcode2, &fmt); // lookup again
   }
@@ -323,7 +323,7 @@ dis86_instr_t *dis86_next(dis86_t *d)
 
 
   // Need ModRM
-  u8 modrm = need_modrm ? binary_fetch_u8(d->b) : 0;
+  uint8_t modrm = need_modrm ? binary_fetch_uint8_t(d->b) : 0;
 
   // Process normal modrm reg
   if (oper_reg8)  *oper_reg8  = operand_reg(reg8(modrm_reg(modrm)));
@@ -338,9 +338,9 @@ dis86_instr_t *dis86_next(dis86_t *d)
   if (oper_m32)  *oper_m32  = operand_m32(d->b, modrm, sreg);
 
   // Process any immediate data
-  if (oper_imm8)     *oper_imm8     = operand_imm8(binary_fetch_u8(d->b));
-  if (oper_imm8_ext) *oper_imm8_ext = operand_imm16((i8)binary_fetch_u8(d->b));
-  if (oper_imm16)    *oper_imm16    = operand_imm16(binary_fetch_u16(d->b));
+  if (oper_imm8)     *oper_imm8     = operand_imm8(binary_fetch_uint8_t(d->b));
+  if (oper_imm8_ext) *oper_imm8_ext = operand_imm16((int8_t)binary_fetch_uint8_t(d->b));
+  if (oper_imm16)    *oper_imm16    = operand_imm16(binary_fetch_uint16_t(d->b));
 
   // Process any memory offset immediates
   if (oper_moff8)  *oper_moff8  = operand_moff(d->b, SIZE_8, sreg);

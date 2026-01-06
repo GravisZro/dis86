@@ -2,12 +2,12 @@
 
 #define DEBUG_REPORT_SYMBOLS 0
 
-static const char *n_bytes_as_type(u16 n_bytes)
+static const char *n_bytes_as_type(uint16_t n_bytes)
 {
   switch (n_bytes) {
-    case 1: return "u8";
-    case 2: return "u16";
-    case 4: return "u32";
+    case 1: return "uint8_t";
+    case 2: return "uint16_t";
+    case 4: return "uint32_t";
     default: FAIL("Unknown size type | n_bytes: %u", n_bytes);
   }
 }
@@ -19,7 +19,7 @@ struct decompiler
   dis86_decompile_config_t * cfg;
   dis86_decompile_config_t * default_cfg;
   const char *               func_name;
-  u16                        seg;
+  uint16_t                        seg;
   dis86_instr_t *            ins;
   size_t                     n_ins;
 
@@ -32,7 +32,7 @@ struct decompiler
 static decompiler_t * decompiler_new( dis86_t *                  dis,
                                       dis86_decompile_config_t * opt_cfg,
                                       const char *               func_name,
-                                      u16                        seg,
+                                      uint16_t                        seg,
                                       dis86_instr_t *            ins_arr,
                                       size_t                     n_ins )
 
@@ -77,7 +77,7 @@ static void dump_symtab(symtab_t *symtab)
     } else {
       size = "UNKNOWN";
     }
-    LOG_INFO("  %-30s | %04x | %6u | %s", sym_name(var, buf, ARRAY_SIZE(buf)), (u16)var->off, var->len, size);
+    LOG_INFO("  %-30s | %04x | %6u | %s", sym_name(var, buf, ARRAY_SIZE(buf)), (uint16_t)var->off, var->len, size);
   }
 }
 
@@ -121,7 +121,7 @@ static void decompiler_initial_analysis(decompiler_t *d)
       if (!symbols_insert_deduced(d->symbols, deduced_sym)) {
         static char buf[128];
         const char *name = sym_name(deduced_sym, buf, ARRAY_SIZE(buf));
-        LOG_WARN("Unknown global | name: %s  off: 0x%04x  size: %u", name, (u16)deduced_sym->off, deduced_sym->len);
+        LOG_WARN("Unknown global | name: %s  off: 0x%04x  size: %u", name, (uint16_t)deduced_sym->off, deduced_sym->len);
       }
     }
   }
@@ -231,7 +231,7 @@ static void symref_lvalue_str(symref_t ref, const char *name, str_t *s)
     if (sn) {
       str_fmt(s, "%s", sn);
     } else {
-      str_fmt(s, "*(%s*)((u8*)&%s + %u)", n_bytes_as_type(ref.len), name, ref.off);
+      str_fmt(s, "*(%s*)((uint8_t*)&%s + %u)", n_bytes_as_type(ref.len), name, ref.off);
     }
   }
 }
@@ -253,7 +253,7 @@ static void symref_rvalue_str(symref_t ref, const char *name, str_t *s)
     if (sn) {
       str_fmt(s, "%s", sn);
     } else {
-      u16 bits = 8 * ref.off;
+      uint16_t bits = 8 * ref.off;
       str_fmt(s, "(%s)(%s>>%u)", n_bytes_as_type(ref.len), name, bits);
     }
   }
@@ -287,16 +287,16 @@ static void value_str(value_t *v, str_t *s, bool as_lvalue)
         if (m->reg1.symbol) str_fmt(s, "%s", sym_name(m->reg1.symbol, buf, ARRAY_SIZE(buf)));
         if (m->reg2.symbol) str_fmt(s, "+%s", sym_name(m->reg2.symbol, buf, ARRAY_SIZE(buf)));
         if (m->off) {
-          i16 disp = (i16)m->off;
-          /* if (disp >= 0) str_fmt(s, "+0x%x", (u16)disp); */
-          /* else           str_fmt(s, "-0x%x", (u16)-disp); */
-          str_fmt(s, "+0x%x", (u16)disp);
+          int16_t disp = (int16_t)m->off;
+          /* if (disp >= 0) str_fmt(s, "+0x%x", (uint16_t)disp); */
+          /* else           str_fmt(s, "-0x%x", (uint16_t)-disp); */
+          str_fmt(s, "+0x%x", (uint16_t)disp);
         }
       }
       str_fmt(s, ")");
     } break;
     case VALUE_TYPE_IMM: {
-      u16 val = v->u.imm->value;
+      uint16_t val = v->u.imm->value;
       if (val == 0) {
         str_fmt(s, "0");
       } else {
@@ -328,10 +328,10 @@ static void decompiler_emit_expr(decompiler_t *d, expr_t *expr, str_t *ret_s)
     } break;
     case EXPR_KIND_OPERATOR2: {
       expr_operator2_t *k = expr->k.operator2;
-      if (k->operator.sign) str_fmt(s, "(i16)");
+      if (k->operator.sign) str_fmt(s, "(int16_t)");
       value_str(&k->dest, s, true);
       str_fmt(s, " %s ", k->operator);
-      if (k->operator.sign) str_fmt(s, "(i16)");
+      if (k->operator.sign) str_fmt(s, "(int16_t)");
       value_str(&k->src, s, false);
       str_fmt(s, ";");
     } break;
@@ -339,10 +339,10 @@ static void decompiler_emit_expr(decompiler_t *d, expr_t *expr, str_t *ret_s)
       expr_operator3_t *k = expr->k.operator3;
       value_str(&k->dest, s, true);
       str_fmt(s, " = ");
-      if (k->operator.sign) str_fmt(s, "(i16)");
+      if (k->operator.sign) str_fmt(s, "(int16_t)");
       value_str(&k->left, s, false);
       str_fmt(s, " %s ", k->operator);
-      if (k->operator.sign) str_fmt(s, "(i16)");
+      if (k->operator.sign) str_fmt(s, "(int16_t)");
       value_str(&k->right, s, false);
       str_fmt(s, ";");
     } break;
@@ -362,10 +362,10 @@ static void decompiler_emit_expr(decompiler_t *d, expr_t *expr, str_t *ret_s)
     case EXPR_KIND_BRANCH_COND: {
       expr_branch_cond_t *k = expr->k.branch_cond;
       str_fmt(s, "if (");
-      if (k->operator.sign) str_fmt(s, "(i16)");
+      if (k->operator.sign) str_fmt(s, "(int16_t)");
       value_str(&k->left, s, false);
       str_fmt(s, " %s ", k->operator);
-      if (k->operator.sign) str_fmt(s, "(i16)");
+      if (k->operator.sign) str_fmt(s, "(int16_t)");
       value_str(&k->right, s, false);
       str_fmt(s, ") goto label_%08x;", k->target);
     } break;
@@ -427,7 +427,7 @@ static void decompiler_emit_expr(decompiler_t *d, expr_t *expr, str_t *ret_s)
 char *dis86_decompile( dis86_t *                  dis,
                        dis86_decompile_config_t * opt_cfg,
                        const char *               func_name,
-                       u16                        seg,
+                       uint16_t                        seg,
                        dis86_instr_t *            ins_arr,
                        size_t                     n_ins )
 {
@@ -440,8 +440,8 @@ char *dis86_decompile( dis86_t *                  dis,
 
   for (size_t i = 0; i < d->meh->expr_len; i++) {
     expr_t *expr = &d->meh->expr_arr[i];
-    if (expr->n_ins > 0 && is_label(d->labels, (u32)expr->ins->addr)) {
-      str_fmt(ret_s, "\n label_%08x:\n", (u32)expr->ins->addr);
+    if (expr->n_ins > 0 && is_label(d->labels, (uint32_t)expr->ins->addr)) {
+      str_fmt(ret_s, "\n label_%08x:\n", (uint32_t)expr->ins->addr);
     }
     decompiler_emit_expr(d, expr, ret_s);
   }

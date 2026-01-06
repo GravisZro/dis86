@@ -1,7 +1,7 @@
 #include "decompile_private.h"
 #include <stdalign.h>
 
-static u16 size_in_bytes(int sz)
+static uint16_t size_in_bytes(int sz)
 {
   switch (sz) {
     case SIZE_8:  return 1;
@@ -13,8 +13,8 @@ static u16 size_in_bytes(int sz)
 
 bool sym_deduce(sym_t *s, operand_mem_t *m)
 {
-  i16 off = (i16)m->off;
-  u16 len = size_in_bytes(m->sz);
+  int16_t off = (int16_t)m->off;
+  uint16_t len = size_in_bytes(m->sz);
 
   // Global?
   if (m->sreg == REG_DS && !m->reg1 && !m->reg2) {
@@ -46,7 +46,7 @@ bool sym_deduce(sym_t *s, operand_mem_t *m)
 
 bool sym_deduce_reg(sym_t *sym, int reg_id)
 {
-  u16 off, len;
+  uint16_t off, len;
   const char *name;
 
   switch (reg_id) {
@@ -76,7 +76,7 @@ bool sym_deduce_reg(sym_t *sym, int reg_id)
   }
 
   sym->kind = SYM_KIND_REGISTER;
-  sym->off  = (i16)off;
+  sym->off  = (int16_t)off;
   sym->len  = len;
   sym->name = name;
   return true;
@@ -95,13 +95,13 @@ const char * sym_name(sym_t *s, char *buf, size_t buf_sz)
 
   switch (s->kind) {
     case SYM_KIND_PARAM: {
-      snprintf(buf, buf_sz, "_param_%04x", (u16)s->off);
+      snprintf(buf, buf_sz, "_param_%04x", (uint16_t)s->off);
     } break;
     case SYM_KIND_LOCAL: {
-      snprintf(buf, buf_sz, "_local_%04x", (u16)-s->off);
+      snprintf(buf, buf_sz, "_local_%04x", (uint16_t)-s->off);
     } break;
     case SYM_KIND_GLOBAL: {
-      snprintf(buf, buf_sz, "G_data_%04x", (u16)s->off);
+      snprintf(buf, buf_sz, "G_data_%04x", (uint16_t)s->off);
     } break;
     default: FAIL("Unknown sym kind: %d", s->kind);
   }
@@ -117,7 +117,7 @@ static bool sym_overlaps(sym_t *a, sym_t *b)
     b = tmp;
   }
 
-  i16 end = (i16)a->off + a->len;
+  int16_t end = (int16_t)a->off + a->len;
 
   return
     a->kind == b->kind &&
@@ -172,8 +172,8 @@ static void symtab_add_merge(symtab_t *s, sym_t *sym)
 
     // Overlaps: grow to encapsulate both!
 
-    i16 new_start = MIN(sym->off, cand->off);
-    i16 new_end   = MAX(sym->off + sym->len, cand->off + cand->len);
+    int16_t new_start = MIN(sym->off, cand->off);
+    int16_t new_end   = MAX(sym->off + sym->len, cand->off + cand->len);
     int new_len   = new_end - new_start;
 
     // Update sym
@@ -286,11 +286,11 @@ symref_t symbols_find_reg(symbols_t *s, int reg_id)
   return symbols_find_ref(s, deduced_sym);
 }
 
-void symbols_add_global(symbols_t *s, const char *name, u16 offset, u16 len)
+void symbols_add_global(symbols_t *s, const char *name, uint16_t offset, uint16_t len)
 {
   sym_t sym[1] = {{}};
   sym->kind = SYM_KIND_GLOBAL;
-  sym->off  = (i16)offset;
+  sym->off  = (int16_t)offset;
   sym->len  = len;
   sym->name = name;
 

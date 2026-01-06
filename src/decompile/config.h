@@ -16,22 +16,22 @@ struct config_func
   char *   name;
   segoff_t addr;
   char *   ret;
-  i16      args;  // -1 means "unknown"
+  int16_t      args;  // -1 means "unknown"
   bool     pop_args_after_call;
 };
 
 struct config_global
 {
   char *   name;
-  u16      offset;
+  uint16_t      offset;
   char *   type;
 };
 
 struct config_segmap
 {
   char * name;
-  u16    from;
-  u16    to;
+  uint16_t    from;
+  uint16_t    to;
 };
 
 struct dis86_decompile_config
@@ -52,4 +52,4 @@ void            config_delete(config_t *cfg);
 
 void            config_print(config_t *cfg);
 config_func_t * config_func_lookup(config_t *cfg, segoff_t s);
-bool            config_seg_remap(config_t *cfg, u16 *inout_seg);
+bool            config_seg_remap(config_t *cfg, uint16_t *inout_seg);

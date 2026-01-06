@@ -76,12 +76,12 @@ static inline int parse_type(parser_t *p)
   parse_tok(p, &tok, &tok_len);
   if (tok_len == 0) FAIL("Reached end while parsing type in line: '%s'", p->line);
 
-  if (tok_len == 2 && 0 == memcmp(tok, "u8", 2))  return DATAMAP_TYPE_U8;
-  else if (tok_len == 3 && 0 == memcmp(tok, "u16", 3)) return DATAMAP_TYPE_U16;
+  if (tok_len == 2 && 0 == memcmp(tok, "uint8_t", 2))  return DATAMAP_TYPE_U8;
+  else if (tok_len == 3 && 0 == memcmp(tok, "uint16_t", 3)) return DATAMAP_TYPE_U16;
   else FAIL("Unknown type '%.*s' in line: '%s'", (int)tok_len, tok, p->line);
 }
 
-static inline u16 parse_addr(parser_t *p)
+static inline uint16_t parse_addr(parser_t *p)
 {
   const char *tok;
   size_t tok_len;
@@ -95,7 +95,7 @@ static inline u16 parse_addr(parser_t *p)
     FAIL("Hex number too long for addr in line: '%s'", p->line);
   }
 
-  u16 num = 0;
+  uint16_t num = 0;
   for (size_t i = 2; i < tok_len; i++) {
     char c = tok[i];
     if ('0' <= c && c <= '9') num = num*16 + (c-'0');

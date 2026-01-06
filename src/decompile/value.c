@@ -55,7 +55,7 @@ value_t value_from_symref(symref_t ref)
   return *val;
 }
 
-value_t value_from_imm(u16 imm)
+value_t value_from_imm(uint16_t imm)
 {
   value_t val[1];
   val->type = VALUE_TYPE_IMM;

@@ -97,24 +97,24 @@ struct operand_mem
   int sreg; // always must be populated
   int reg1; // 0 if unused
   int reg2; // 0 if unused
-  u16 off;  // 0 if unused
+  uint16_t off;  // 0 if unused
 };
 
 struct operand_imm
 {
   int sz;
-  u16 val;
+  uint16_t val;
 };
 
 struct operand_rel
 {
-  u16 val;
+  uint16_t val;
 };
 
 struct operand_far
 {
-  u16 seg;
-  u16 off;
+  uint16_t seg;
+  uint16_t off;
 };
 
 struct operand

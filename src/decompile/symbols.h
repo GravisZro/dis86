@@ -20,8 +20,8 @@ enum {
 struct sym
 {
   int          kind;
-  i16          off;
-  u16          len;              // in bytes
+  int16_t          off;
+  uint16_t          len;              // in bytes
   const char * name;             // optional (default name is constructed otherwise)
 };
 
@@ -44,13 +44,13 @@ bool        symbols_insert_deduced(symbols_t *s, sym_t *deduced_sym);
 symref_t    symbols_find_ref(symbols_t *s, sym_t *deduced_sym);
 symref_t    symbols_find_mem(symbols_t *s, operand_mem_t *mem);
 symref_t    symbols_find_reg(symbols_t *s, int reg_id);
-void        symbols_add_global(symbols_t *s, const char *name, u16 offset, u16 len);
+void        symbols_add_global(symbols_t *s, const char *name, uint16_t offset, uint16_t len);
 
 struct symref
 {
   sym_t * symbol;  // NULL if the ref doesn't point anywhere
-  u16     off;     // offset into this symbol
-  u16     len;     // length from the offset
+  uint16_t     off;     // offset into this symbol
+  uint16_t     len;     // length from the offset
 };
 
 bool symref_matches(symref_t *a, symref_t *b);

@@ -43,8 +43,8 @@ config_t * config_read_new(const char *path)
 
     bool pop_args_after_call = !bsl_get_str(f, "dont_pop_args");
 
-    i16 args;
-    if (!parse_bytes_i16(args_str, strlen(args_str), &args)) FAIL("Expected u16 for '%s.args', got '%s'", key, args_str);
+    int16_t args;
+    if (!parse_bytes_int16_t(args_str, strlen(args_str), &args)) FAIL("Expected uint16_t for '%s.args', got '%s'", key, args_str);
 
     assert(cfg->func_len < ARRAY_SIZE(cfg->func_arr));
     config_func_t *cf = &cfg->func_arr[cfg->func_len++];
@@ -72,7 +72,7 @@ config_t * config_read_new(const char *path)
     assert(cfg->global_len < ARRAY_SIZE(cfg->global_arr));
     config_global_t *g = &cfg->global_arr[cfg->global_len++];
     g->name   = strdup(key);
-    g->offset = parse_hex_u16(off_str, strlen(off_str));
+    g->offset = parse_hex_uint16_t(off_str, strlen(off_str));
     g->type   = strdup(type_str);
   }
 
@@ -86,11 +86,11 @@ config_t * config_read_new(const char *path)
 
     const char *from_str = bsl_get_str(s, "from");
     if (!from_str) FAIL("No segmap 'from' property for '%s'", key);
-    u16 from = parse_hex_u16(from_str, strlen(from_str));
+    uint16_t from = parse_hex_uint16_t(from_str, strlen(from_str));
 
     const char *to_str = bsl_get_str(s, "to");
     if (!to_str) FAIL("No segmap 'to' property for '%s'", key);
-    u16 to = parse_hex_u16(to_str, strlen(to_str));
+    uint16_t to = parse_hex_uint16_t(to_str, strlen(to_str));
 
     assert(cfg->segmap_len < ARRAY_SIZE(cfg->segmap_arr));
     config_segmap_t *sm = &cfg->segmap_arr[cfg->segmap_len++];
@@ -154,9 +154,9 @@ config_func_t * config_func_lookup(config_t *cfg, segoff_t s)
   return NULL;
 }
 
-bool config_seg_remap(config_t *cfg, u16 *_seg)
+bool config_seg_remap(config_t *cfg, uint16_t *_seg)
 {
-  u16 seg = *_seg;
+  uint16_t seg = *_seg;
   for (size_t i = 0; i < cfg->segmap_len; i++) {
     config_segmap_t *sm = &cfg->segmap_arr[i];
     if (seg == sm->from) {

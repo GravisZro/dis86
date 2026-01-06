@@ -117,7 +117,7 @@ static size_t _impl_abstract_jump(expr_t *expr, symbols_t *symbols, dis86_instr_
   expr_branch_flags_t *k = expr->k.branch_flags;
   k->op     = _operation;
   k->flags  = value_from_symref(symbols_find_reg(symbols, REG_FLAGS));
-  k->target = ins->addr + ins->n_bytes + (i16)ins->operand[0].u.rel.val;
+  k->target = ins->addr + ins->n_bytes + (int16_t)ins->operand[0].u.rel.val;
 
   return 1;
 }
@@ -150,7 +150,7 @@ static size_t _impl_call_far(expr_t *expr, config_t *cfg, symbols_t *symbols, di
   return 1;
 }
 
-static size_t _impl_call_near(u16 seg, expr_t *expr,
+static size_t _impl_call_near(uint16_t seg, expr_t *expr,
                               config_t *cfg, symbols_t *symbols, dis86_instr_t *ins)
 {
   if (ins->operand[0].type != OPERAND_TYPE_REL) {
@@ -158,10 +158,10 @@ static size_t _impl_call_near(u16 seg, expr_t *expr,
     return 1;
   }
 
-  size_t effective = (u16)(ins->addr + ins->n_bytes + ins->operand[0].u.rel.val);
-  //printf("effective: 0x%x | seg: 0x%x\n", (u32)effective, seg);
+  size_t effective = (uint16_t)(ins->addr + ins->n_bytes + ins->operand[0].u.rel.val);
+  //printf("effective: 0x%x | seg: 0x%x\n", (uint32_t)effective, seg);
   assert(16*(size_t)seg <= effective && effective < 16*(size_t)seg + (1<<16));
-  u16 off = effective - 16*(size_t)seg;
+  uint16_t off = effective - 16*(size_t)seg;
 
   segoff_t addr = {seg, off};
   config_func_t *func = config_func_lookup(cfg, addr);
@@ -193,7 +193,7 @@ static size_t _impl_load_effective_addr(expr_t *expr, symbols_t *symbols, dis86_
   k->operator.sign = 0;
   k->dest = value_from_operand(&ins->operand[0], symbols);
   k->left = value_from_symref(symbols_find_reg(symbols, mem->reg1));
-  k->right = value_from_imm(-(i16)mem->off);
+  k->right = value_from_imm(-(int16_t)mem->off);
 
   return 1;
 }
@@ -210,7 +210,7 @@ static size_t _impl_load_effective_addr(expr_t *expr, symbols_t *symbols, dis86_
 #define CALL_NEAR()              _impl_call_near(seg, expr, cfg, symbols, ins)
 #define LOAD_EFFECTIVE_ADDR()    _impl_load_effective_addr(expr, symbols, ins)
 
-static size_t extract_expr(u16 seg, expr_t *expr, config_t *cfg, symbols_t *symbols,
+static size_t extract_expr(uint16_t seg, expr_t *expr, config_t *cfg, symbols_t *symbols,
                            dis86_instr_t *ins, size_t n_ins)
 {
   switch (ins->opcode) {
@@ -338,7 +338,7 @@ value_t expr_destination(expr_t *expr)
   }
 }
 
-meh_t * meh_new(config_t *cfg, symbols_t *symbols, u16 seg, dis86_instr_t *ins, size_t n_ins)
+meh_t * meh_new(config_t *cfg, symbols_t *symbols, uint16_t seg, dis86_instr_t *ins, size_t n_ins)
 {
   meh_t *m = calloc(1, sizeof(meh_t));
 

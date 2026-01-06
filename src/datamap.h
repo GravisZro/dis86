@@ -19,7 +19,7 @@ struct datamap_entry
 {
   char * name;
   int    type; /* DATAMAP_TYPE_ */
-  u16    addr;
+  uint16_t    addr;
 };
 
 datamap_t *datamap_load_from_mem(const char *str, size_t n);

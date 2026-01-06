@@ -1,7 +1,7 @@
 #include "cmdarg.h"
 #include <string.h>
 
-static inline bool parse_u64(const char *s, uint64_t *_num)
+static inline bool parse_uint64_t(const char *s, uint64_t *_num)
 {
   uint64_t num = 0;
   while (1) {
@@ -18,7 +18,7 @@ static inline bool parse_u64(const char *s, uint64_t *_num)
   return true;
 }
 
-static inline bool parse_i64(const char *s, int64_t *_num)
+static inline bool parse_int64_t(const char *s, int64_t *_num)
 {
   bool neg = false;
   if (*s == '-') {
@@ -27,7 +27,7 @@ static inline bool parse_i64(const char *s, int64_t *_num)
   }
 
   uint64_t unum = 0;
-  if (!parse_u64(s, &unum)) return false;
+  if (!parse_uint64_t(s, &unum)) return false;
 
   int64_t num;
   if (neg) {
@@ -102,7 +102,7 @@ bool cmdarg_string(int * _argc, char *** _argv, const char * name, const char **
   return true;
 }
 
-bool cmdarg_u64(int * _argc, char *** _argv, const char * name, uint64_t *_out)
+bool cmdarg_uint64_t(int * _argc, char *** _argv, const char * name, uint64_t *_out)
 {
   char ** argv = *_argv;
   int     argc = *_argc;
@@ -122,7 +122,7 @@ bool cmdarg_u64(int * _argc, char *** _argv, const char * name, uint64_t *_out)
   // Try to parse that value
   uint64_t ret = 0;
   const char *data =  argv[found_idx+1];
-  if (!parse_u64(data, &ret)) return false;
+  if (!parse_uint64_t(data, &ret)) return false;
 
   // On success, remove from the arg list
   for (int i = found_idx+2; i < argc; i++) {
@@ -135,7 +135,7 @@ bool cmdarg_u64(int * _argc, char *** _argv, const char * name, uint64_t *_out)
   return true;
 }
 
-bool cmdarg_i64(int * _argc, char *** _argv, const char * name, int64_t *_out)
+bool cmdarg_int64_t(int * _argc, char *** _argv, const char * name, int64_t *_out)
 {
   char ** argv = *_argv;
   int     argc = *_argc;
@@ -155,7 +155,7 @@ bool cmdarg_i64(int * _argc, char *** _argv, const char * name, int64_t *_out)
   // Try to parse that value
   int64_t ret = 0;
   const char *data =  argv[found_idx+1];
-  if (!parse_i64(data, &ret)) return false;
+  if (!parse_int64_t(data, &ret)) return false;
 
   // On success, remove from the arg list
   for (int i = found_idx+2; i < argc; i++) {
