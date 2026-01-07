@@ -5,6 +5,7 @@
 
 #include "common/common.h"
 #include <cstdint>
+#include <string>
 
 namespace disassembler
 {
@@ -63,14 +64,13 @@ namespace disassembler
 
     dis_exit = d;
 
-    char *s;
-    while (1) {
-      dis86_instr_t *ins = dis86_next(d);
-      if (!ins) break;
-
+    std::string s;
+    dis86_instr_t* ins = nullptr;
+    while (ins = dis86_next(d), ins != nullptr)
+    {
       s = dis86_print_intel_syntax(d, ins, true);
-      printf("%s\n", s);
-      free(s);
+      printf("%s\n", s.c_str());
+      s.clear();
     }
 
     dis_exit = nullptr;

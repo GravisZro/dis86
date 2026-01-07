@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <unistd.h>
+#include <string>
 
 #define NAME_MAX 128
 
@@ -43,7 +44,7 @@ struct symref_t
 
 bool         sym_deduce(sym_t *v, operand_mem_t *mem);
 bool         sym_deduce_reg(sym_t *sym, int reg_id);
-const char * sym_name(sym_t *v, char *buf, size_t buf_sz);
+std::string sym_name(sym_t *v);
 size_t       sym_size_bytes(sym_t *v);
 
 struct symbols_t

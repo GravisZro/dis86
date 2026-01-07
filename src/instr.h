@@ -207,7 +207,7 @@ struct dis86_instr_t
 {
   int       rep;
   operation_e opcode;
-  operand_t operand[OPERAND_MAX];
+  std::array<operand_t, OPERAND_MAX> operand;
   size_t    addr;
   size_t    n_bytes;
   int       intel_hidden;   /* bitmap of operands hidden in intel assembly */
@@ -218,7 +218,7 @@ struct instr_fmt_t
   operation_e op;             /* operation_e:: */
   uint8_t opcode1;        /* first byte: opcode */
   uint8_t opcode2;        /* 3-bit modrm reg field: sometimes used as level 2 opcode */
-  std::array<operand_e, 3> operands;       /* operand:: */
+  std::array<operand_e, OPERAND_MAX> operands;       /* operand:: */
   uint8_t intel_hidden;   /* bitmap of operands hidden in intel assembly */
 };
 

@@ -2,9 +2,10 @@
 #define DIS86_H
 
 #include <stdlib.h>
-#include <stdbool.h>
 #include <unistd.h>
 #include <stdint.h>
+
+#include <string>
 
 #include "decompile/config.h"
 #include "common/segment.h"
@@ -69,7 +70,7 @@ void dis86_instr_copy(dis86_instr_t *dst, dis86_instr_t *src);
 /*****************************************************************/
 
 /* Print */
-char *dis86_print_intel_syntax(dis86_t *d, dis86_instr_t *ins, bool with_detail);
+std::string dis86_print_intel_syntax(dis86_t *d, dis86_instr_t *ins, bool with_detail);
 
 /*****************************************************************/
 /* DECOMPILE ROUTINES */
@@ -81,12 +82,12 @@ dis86_decompile_config_t * dis86_decompile_config_read_new(const char *path);
 void                       dis86_decompile_config_delete(dis86_decompile_config_t *cfg);
 
 /* Decompile to C code */
-char *dis86_decompile( dis86_t *                  dis,
-                       dis86_decompile_config_t * opt_cfg, /* optional */
-                       const char *               func_name,
-                       uint16_t                   seg,
-                       dis86_instr_t *            ins,
-                       size_t                     n_ins );
+std::string dis86_decompile(dis86_t *                  dis,
+                            dis86_decompile_config_t * opt_cfg, /* optional */
+                            const char *               func_name,
+                            uint16_t                   seg,
+                            dis86_instr_t *            ins,
+                            size_t                     n_ins );
 
 
 #endif

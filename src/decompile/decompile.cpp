@@ -1,6 +1,9 @@
 #include "decompile_private.h"
 
+#include <format>
+
 #define DEBUG_REPORT_SYMBOLS 0
+
 
 static const char *n_bytes_as_type(uint16_t n_bytes)
 {
@@ -70,14 +73,13 @@ static void dump_symtab(symtab_t *symtab)
     sym_t *var = symtab_iter_next(it);
     if (!var) break;
 
-    static char buf[128];
     const char *size;
     if (var->len <= 4) {
       size = n_bytes_as_type(var->len);
     } else {
       size = "UNKNOWN";
     }
-    LOG_INFO("  %-30s | %04x | %6u | %s", sym_name(var, buf, ARRAY_SIZE(buf)), (uint16_t)var->off, var->len, size);
+    LOG_INFO("  %-30s | %04x | %6u | %s", sym_name(var).c_str(), (uint16_t)var->off, var->len, size);
   }
 }
 
@@ -119,9 +121,8 @@ static void decompiler_initial_analysis(decompiler_t *d)
       if (!sym_deduce(deduced_sym, &o->u.mem)) continue;
 
       if (!symbols_insert_deduced(d->symbols, deduced_sym)) {
-        static char buf[128];
-        const char *name = sym_name(deduced_sym, buf, ARRAY_SIZE(buf));
-        LOG_WARN("Unknown global | name: %s  off: 0x%04x  size: %u", name, (uint16_t)deduced_sym->off, deduced_sym->len);
+        std::string name = sym_name(deduced_sym);
+        LOG_WARN("Unknown global | name: %s  off: 0x%04x  size: %u", name.c_str(), (uint16_t)deduced_sym->off, deduced_sym->len);
       }
     }
   }
@@ -142,9 +143,8 @@ static void decompiler_initial_analysis(decompiler_t *d)
   }
 }
 
-static void decompiler_emit_preamble(decompiler_t *d, str_t *s)
+static void decompiler_emit_preamble(decompiler_t *d, std::string& s)
 {
-  static char buf[128];
   symtab_iter_t it[1];
 
   // Emit params
@@ -153,8 +153,8 @@ static void decompiler_emit_preamble(decompiler_t *d, str_t *s)
     sym_t *var = symtab_iter_next(it);
     if (!var) break;
 
-    const char *name = sym_name(var, buf, ARRAY_SIZE(buf));
-    str_fmt(s, "#define %s ARG_%zu(0x%x)\n", name, 8*sym_size_bytes(var), var->off);
+    std::string name = sym_name(var);
+    s += std::format<"#define %s ARG_%zu(0x%x)\n">(name, 8*sym_size_bytes(var), var->off);
   }
 
   // Emit locals
@@ -163,289 +163,266 @@ static void decompiler_emit_preamble(decompiler_t *d, str_t *s)
     sym_t *var = symtab_iter_next(it);
     if (!var) break;
 
-    const char *name = sym_name(var, buf, ARRAY_SIZE(buf));
-    str_fmt(s, "#define %s LOCAL_%zu(0x%x)\n", name, 8*sym_size_bytes(var), -var->off);
+    std::string name = sym_name(var);
+    s += std::format<"#define %s LOCAL_%zu(0x%x)\n">(name, 8*sym_size_bytes(var), -var->off);
   }
 
-  str_fmt(s, "void %s(void)\n", d->func_name);
-  str_fmt(s, "{\n");
+  s += std::format<"void %s(void)\n">(d->func_name);
+  s += "{\n";
 }
 
-static void decompiler_emit_postamble(decompiler_t *d, str_t *s)
+static void decompiler_emit_postamble(decompiler_t *d, std::string& s)
 {
-  static char buf[128];
   symtab_iter_t it[1];
 
-  str_fmt(s, "}\n");
+  s += "}\n";
 
   // Cleanup params
   symtab_iter_begin(it, d->symbols->params);
-  while (1) {
-    sym_t *var = symtab_iter_next(it);
-    if (!var) break;
-    str_fmt(s, "#undef %s\n", sym_name(var, buf, ARRAY_SIZE(buf)));
-  }
+  sym_t* var = nullptr;
+  while (var = symtab_iter_next(it), var != nullptr)
+    s += std::format<"#undef %s\n">(sym_name(var));
 
   // Cleanup locals
   symtab_iter_begin(it, d->symbols->locals);
-  while (1) {
-    sym_t *var = symtab_iter_next(it);
-    if (!var) break;
-    str_fmt(s, "#undef %s\n", sym_name(var, buf, ARRAY_SIZE(buf)));
-  }
+  while (var = symtab_iter_next(it), var != nullptr)
+    s += std::format<"#undef %s\n">(sym_name(var));
 }
 
-static const char *short_name(const char *name, size_t off, size_t n_bytes)
+std::string short_name(const std::string& name, size_t off, size_t n_bytes)
 {
-  static char buf[3] = {};
-  if (0 != strcmp(name, "AX") &&
-      0 != strcmp(name, "BX") &&
-      0 != strcmp(name, "CX") &&
-      0 != strcmp(name, "DX")) {
-    return nullptr;
+  std::string tmp;
+  if (name == "AX" ||
+      name == "BX" ||
+      name == "CX" ||
+      name == "DX")
+  {
+    tmp.push_back(name.front());
+    assert(n_bytes == 1 && (off == 0 || off == 1));
+    tmp.push_back(!off ? 'L' : 'H');
   }
-
-  buf[0] = name[0];
-
-  assert(n_bytes == 1);
-  if (off == 0) {
-    buf[1] = 'L';
-  } else {
-    assert(off == 1);
-    buf[1] = 'H';
-  }
-
-  return buf;
+  return tmp;
 }
 
-static void symref_lvalue_str(symref_t ref, const char *name, str_t *s)
+static std::string symref_lvalue_str(symref_t ref, const std::string& name)
 {
   assert(ref.symbol);
+  std::string s;
 
-  if (ref.off == 0 && ref.len == ref.symbol->len) {
-    str_fmt(s, "%s", name);
-  }
-
-  else {
-    const char *sn = short_name(name, ref.off, ref.len);
-    if (sn) {
-      str_fmt(s, "%s", sn);
-    } else {
-      str_fmt(s, "*(%s*)((uint8_t*)&%s + %u)", n_bytes_as_type(ref.len), name, ref.off);
-    }
-  }
+  if (ref.off == 0 && ref.len == ref.symbol->len)
+    s = name;
+  else if(s = short_name(name, ref.off, ref.len); s.empty())
+    s = std::format<"*(%s*)((uint8_t*)&%s + %u)">(n_bytes_as_type(ref.len), name, ref.off);
+  return s;
 }
 
-static void symref_rvalue_str(symref_t ref, const char *name, str_t *s)
+static std::string symref_rvalue_str(symref_t ref, const std::string& name)
 {
+  std::string s;
   assert(ref.symbol);
-  if (ref.off == 0) {
-    if (ref.len == ref.symbol->len) {
-      str_fmt(s, "%s", name);
-    } else {
-      // Offset is the same, so just truncate it down
-      str_fmt(s, "(%s)%s", n_bytes_as_type(ref.len), name);
-    }
+  if (ref.off == 0)
+  {
+    if (ref.len == ref.symbol->len)
+      s = name;
+    else
+      s = std::format<"(%s)%s">(n_bytes_as_type(ref.len), name);
   }
-
-  else {
-    const char *sn = short_name(name, ref.off, ref.len);
-    if (sn) {
-      str_fmt(s, "%s", sn);
-    } else {
-      uint16_t bits = 8 * ref.off;
-      str_fmt(s, "(%s)(%s>>%u)", n_bytes_as_type(ref.len), name, bits);
-    }
-  }
+  else if(s = short_name(name, ref.off, ref.len); s.empty())
+    s = std::format<"(%s)(%s>>%u)">(n_bytes_as_type(ref.len), name, (8 * ref.off));
+  return s;
 }
 
-static void value_str(value_t *v, str_t *s, bool as_lvalue)
+static std::string value_str(value_t *v, bool as_lvalue)
 {
-  static char buf[128];
+  std::string s;
 
   switch (v->type) {
     case VALUE_TYPE_SYM: {
-      const char *name = sym_name(v->u.sym->ref.symbol, buf, ARRAY_SIZE(buf));
       if (as_lvalue) {
-        symref_lvalue_str(v->u.sym->ref, name, s);
+        s += symref_lvalue_str(v->u.sym->ref, sym_name(v->u.sym->ref.symbol));
       } else {
-        symref_rvalue_str(v->u.sym->ref, name, s);
+        s += symref_rvalue_str(v->u.sym->ref, sym_name(v->u.sym->ref.symbol));
       }
     } break;
     case VALUE_TYPE_MEM: {
       value_mem_t *m = v->u.mem;
       switch (m->sz) {
-        case SIZE_8:  str_fmt(s, "*PTR_8("); break;
-        case SIZE_16: str_fmt(s, "*PTR_16("); break;
-        case SIZE_32: str_fmt(s, "*PTR_32("); break;
+        case SIZE_8:  s += "*PTR_8("; break;
+        case SIZE_16: s += "*PTR_16("; break;
+        case SIZE_32: s += "*PTR_32("; break;
       }
-      str_fmt(s, "%s, ", sym_name(m->sreg.symbol, buf, ARRAY_SIZE(buf)));
+      s += sym_name(m->sreg.symbol) + ", ";
       // FIXME: THIS IS ALL BROKEN BECAUSE IT ASSUMES THE SYMREF ARE NEVER PARTIAL REFS
-      if (!m->reg1.symbol && !m->reg2.symbol) {
-        if (m->off) str_fmt(s, "0x%x", m->off);
-      } else {
-        if (m->reg1.symbol) str_fmt(s, "%s", sym_name(m->reg1.symbol, buf, ARRAY_SIZE(buf)));
-        if (m->reg2.symbol) str_fmt(s, "+%s", sym_name(m->reg2.symbol, buf, ARRAY_SIZE(buf)));
+      if (!m->reg1.symbol && !m->reg2.symbol)
+      {
+        if (m->off)
+          s += std::format<"0x%x">(m->off);
+      }
+      else
+      {
+        if (m->reg1.symbol)
+          s += sym_name(m->reg1.symbol);
+        if (m->reg2.symbol)
+          s += "+" + sym_name(m->reg2.symbol);
         if (m->off) {
           int16_t disp = (int16_t)m->off;
           /* if (disp >= 0) str_fmt(s, "+0x%x", (uint16_t)disp); */
           /* else           str_fmt(s, "-0x%x", (uint16_t)-disp); */
-          str_fmt(s, "+0x%x", (uint16_t)disp);
+          s += std::format<"+0x%x">((uint16_t)disp);
         }
       }
-      str_fmt(s, ")");
+      s += ")";
     } break;
     case VALUE_TYPE_IMM: {
       uint16_t val = v->u.imm->value;
-      if (val == 0) {
-        str_fmt(s, "0");
-      } else {
-        str_fmt(s, "0x%x", val);
-      }
+      if (val == 0)
+        s += "0";
+      else
+        s += std::format<"0x%x">(val);
     } break;
     default: FAIL("Unknown value type: %d\n", v->type);
   }
+  return s;
 }
 
-static void decompiler_emit_expr(decompiler_t *d, expr_t *expr, str_t *ret_s)
+static void decompiler_emit_expr(decompiler_t *d, std::string& ret_s, expr_t *expr)
 {
-  str_t s[1];
-  str_init(s);
-
+  std::string s;
   switch (expr->kind) {
     case EXPR_KIND_NONE: {
       return;
     } break;
     case EXPR_KIND_UNKNOWN: {
-      str_fmt(s, "UNKNOWN();");
+      s += "UNKNOWN();";
     } break;
     case EXPR_KIND_OPERATOR1: {
       expr_operator1_t *k = expr->k.operator1;
       assert(!k->op.sign); // not sure what this would mean...
-      value_str(&k->dest, s, true);
-      str_fmt(s, " %s ", k->op);
-      str_fmt(s, ";");
+      s += value_str(&k->dest, true);
+      s += std::format<" %s ;">(k->op);
     } break;
     case EXPR_KIND_OPERATOR2: {
       expr_operator2_t *k = expr->k.operator2;
-      if (k->op.sign) str_fmt(s, "(int16_t)");
-      value_str(&k->dest, s, true);
-      str_fmt(s, " %s ", k->op);
-      if (k->op.sign) str_fmt(s, "(int16_t)");
-      value_str(&k->src, s, false);
-      str_fmt(s, ";");
+      if (k->op.sign)
+        s += "(int16_t)";
+      s += value_str(&k->dest, true);
+      s += std::format<" %s ">(k->op);
+      if (k->op.sign)
+        s += "(int16_t)";
+      s += value_str(&k->src, false) + ";";
     } break;
     case EXPR_KIND_OPERATOR3: {
       expr_operator3_t *k = expr->k.operator3;
-      value_str(&k->dest, s, true);
-      str_fmt(s, " = ");
-      if (k->op.sign) str_fmt(s, "(int16_t)");
-      value_str(&k->left, s, false);
-      str_fmt(s, " %s ", k->op);
-      if (k->op.sign) str_fmt(s, "(int16_t)");
-      value_str(&k->right, s, false);
-      str_fmt(s, ";");
+      s += value_str(&k->dest, true) + " = ";
+      if (k->op.sign)
+        s += "(int16_t)";
+      s += value_str(&k->left, false);
+      s += std::format<" %s ">(k->op);
+
+      if (k->op.sign)
+        s += "(int16_t)";
+      s += value_str(&k->right, false) + ";";
     } break;
     case EXPR_KIND_ABSTRACT: {
       expr_abstract_t *k = expr->k.abstract;
       if (!VALUE_IS_NONE(k->ret)) {
-        value_str(&k->ret, s, true);
-        str_fmt(s, " = ");
+        s += value_str(&k->ret, true) + " = ";
       }
-      str_fmt(s, "%s(", k->func_name);
+      s += k->func_name;
+      s += "(";
       for (size_t i = 0; i < k->n_args; i++) {
-        if (i != 0) str_fmt(s, ", ");
-        value_str(&k->args[i], s, false);
+        if (i)
+          s += ", ";
+        s += value_str(&k->args[i], false);
       }
-      str_fmt(s, ");");
+      s += ");";
     } break;
+
     case EXPR_KIND_BRANCH_COND: {
       expr_branch_cond_t *k = expr->k.branch_cond;
-      str_fmt(s, "if (");
-      if (k->op.sign) str_fmt(s, "(int16_t)");
-      value_str(&k->left, s, false);
-      str_fmt(s, " %s ", k->op);
-      if (k->op.sign) str_fmt(s, "(int16_t)");
-      value_str(&k->right, s, false);
-      str_fmt(s, ") goto label_%08x;", k->target);
+      s += "if (";
+      if (k->op.sign)
+        s += "(int16_t)";
+      s += value_str(&k->left, false);
+      s += std::format<" %s ">(k->op);
+      if (k->op.sign)
+        s += "(int16_t)";
+      s += std::format<") goto label_%08x;">(k->target);
     } break;
     case EXPR_KIND_BRANCH_FLAGS: {
       expr_branch_flags_t *k = expr->k.branch_flags;
-      str_fmt(s, "if (%s(", k->op);
-      value_str(&k->flags, s, false);
-      str_fmt(s, ")) goto label_%08x;", k->target);
+      s += std::format<"if (%s(">(k->op);
+      s += value_str(&k->flags, false);
+      s += std::format<")) goto label_%08x;">(k->target);
     } break;
     case EXPR_KIND_BRANCH: {
       expr_branch_t *k = expr->k.branch;
-      str_fmt(s, "goto label_%08x;", k->target);
+      s += std::format<"goto label_%08x;">(k->target);
     } break;
     case EXPR_KIND_CALL: {
       expr_call_t *k = expr->k.call;
       if (k->func) {
-        str_fmt(s, "CALL_FUNC(%s);", k->func->name);
+        s += std::format<"CALL_FUNC(%s);">(k->func->name);
       } else {
         switch (k->addr.type) {
           case addr_type_e::ADDR_TYPE_FAR: {
-            str_fmt(s, "CALL_FAR(0x%04x, 0x%04x);", k->addr.u.far.seg, k->addr.u.far.off);
+              s += std::format<"CALL_FAR(0x%04x, 0x%04x);">(k->addr.u.far.seg, k->addr.u.far.off);
           } break;
           case addr_type_e::ADDR_TYPE_NEAR: {
-            str_fmt(s, "CALL_NEAR(0x%04x);", k->addr.u.near);
+              s += std::format<"CALL_NEAR(0x%04x);">(k->addr.u.near);
           } break;
           default: {
-            FAIL("Unknonw address type: %d", k->addr.type);
+              FAIL("Unknonw address type: %d", int(k->addr.type));
           } break;
         }
       }
-      if (k->remapped) str_fmt(s, " /* remapped */");
+      if (k->remapped)
+        s += " /* remapped */";
     } break;
     case EXPR_KIND_CALL_WITH_ARGS: {
       expr_call_with_args_t *k = expr->k.call_with_args;
-      str_fmt(s, "%s(m", k->func->name);
+      s += std::format<"%s(m">(k->func->name);
       for (size_t i = 0; i < (size_t)k->func->args; i++) {
-        str_fmt(s, ", ");
-        value_str(&k->args[i], s, false);
+        s += ", " + value_str(&k->args[i], false);
       }
-      str_fmt(s, ");");
-      if (k->remapped) str_fmt(s, " /* remapped */");
+      s += ");";
+      if (k->remapped)
+        s += " /* remapped */";
     } break;
     default: {
-      str_fmt(s, "UNIMPL();");
+      s += "UNIMPL();";
     } break;
   }
 
-
-  const char *code_str = str_to_cstr(s);
-  for (size_t i = 0; i < expr->n_ins; i++) {
-    const char *as = dis86_print_intel_syntax(d->dis, &expr->ins[i], false);
-    const char *cs = i+1 == expr->n_ins ? code_str : "";
-    str_fmt(ret_s, "  %-50s // %s\n", cs, as);
-    free((void*)as);
+  for (size_t i = 0; i < expr->n_ins; i++)
+  {
+    std::string as = dis86_print_intel_syntax(d->dis, &expr->ins[i], false);
+    std::string cs = i+1 == expr->n_ins ? s : "";
+    ret_s += std::format<"  %-50s // %s\n">(cs, as);
   }
-  free((void*)code_str);
 }
 
-char *dis86_decompile( dis86_t *                  dis,
+std::string dis86_decompile( dis86_t *                  dis,
                        dis86_decompile_config_t * opt_cfg,
                        const char *               func_name,
                        uint16_t                        seg,
                        dis86_instr_t *            ins_arr,
                        size_t                     n_ins )
 {
-  str_t ret_s[1];
-  str_init(ret_s);
+  std::string s;
 
   decompiler_t *d = decompiler_new(dis, opt_cfg, func_name, seg, ins_arr, n_ins);
   decompiler_initial_analysis(d);
-  decompiler_emit_preamble(d, ret_s);
+  decompiler_emit_preamble(d, s);
 
   for (size_t i = 0; i < d->meh->expr_len; i++) {
     expr_t *expr = &d->meh->expr_arr[i];
     if (expr->n_ins > 0 && is_label(d->labels, (uint32_t)expr->ins->addr)) {
-      str_fmt(ret_s, "\n label_%08x:\n", (uint32_t)expr->ins->addr);
+      s += std::format<"\n label_%08x:\n">((uint32_t)expr->ins->addr);
     }
-    decompiler_emit_expr(d, expr, ret_s);
+    decompiler_emit_expr(d, s, expr);
   }
 
-  decompiler_emit_postamble(d, ret_s);
-  return str_to_cstr(ret_s);
+  decompiler_emit_postamble(d, s);
+  return s;
 }

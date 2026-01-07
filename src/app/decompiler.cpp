@@ -111,9 +111,8 @@ namespace decompiler
     char func_name[256];
     sprintf(func_name, "func_%08x__%04x_%04x", (uint32_t)start_idx, opt->start.seg, opt->start.off);
 
-    const char *s = dis86_decompile(d, cfg, func_name, opt->start.seg, instr, n_instr);
-    printf("%-30s\n", s);
-    free((void*)s);
+    std::string s = dis86_decompile(d, cfg, func_name, opt->start.seg, instr, n_instr);
+    printf("%-30s\n", s.c_str());
 
     dis_exit = nullptr;
     dis86_decompile_config_delete(cfg);

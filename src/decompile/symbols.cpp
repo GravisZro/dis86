@@ -1,6 +1,9 @@
 #include "decompile_private.h"
 #include <stdalign.h>
 
+#include <format>
+#include <string>
+
 static uint16_t size_in_bytes(int sz)
 {
   switch (sz) {
@@ -87,25 +90,27 @@ size_t sym_size_bytes(sym_t *s)
   return s->len;
 }
 
-const char * sym_name(sym_t *s, char *buf, size_t buf_sz)
+std::string sym_name(sym_t *sym)
 {
-  if (s->name) {
-    return s->name;
+  if (sym->name) {
+    return sym->name;
   }
+  std::string s;
 
-  switch (s->kind) {
-    case SYM_KIND_PARAM: {
-      snprintf(buf, buf_sz, "_param_%04x", (uint16_t)s->off);
-    } break;
-    case SYM_KIND_LOCAL: {
-      snprintf(buf, buf_sz, "_local_%04x", (uint16_t)-s->off);
-    } break;
-    case SYM_KIND_GLOBAL: {
-      snprintf(buf, buf_sz, "G_data_%04x", (uint16_t)s->off);
-    } break;
-    default: FAIL("Unknown sym kind: %d", s->kind);
+  switch (sym->kind) {
+    case SYM_KIND_PARAM:
+      s += std::format<"_param_%04x">((uint16_t)sym->off);
+      break;
+    case SYM_KIND_LOCAL:
+      s += std::format<"_local_%04x">((uint16_t)-sym->off);
+      break;
+    case SYM_KIND_GLOBAL:
+      s += std::format<"G_data_%04x">((uint16_t)sym->off);
+      break;
+    default:
+      FAIL("Unknown sym kind: %d", sym->kind);
   }
-  return buf;
+  return s;
 }
 
 static bool sym_overlaps(sym_t *a, sym_t *b)
@@ -234,8 +239,7 @@ bool symbols_insert_deduced(symbols_t *s, sym_t *deduced_sym)
       // symbol cooresponds to some pre-configured global
       symref_t ref = symtab_find(s->globals, deduced_sym);
       if (!ref.symbol) {
-        //static char buf[128];
-        //const char *name = sym_name(deduced_sym, buf, ARRAY_SIZE(buf));
+        //const char *name = sym_name(deduced_sym);
         //FAIL("Failed to find global for '%s'", name);
         return false;
       }

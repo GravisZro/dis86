@@ -11,11 +11,8 @@ project(${TARGET_NAME}
 
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)
 
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD_REQUIRED OFF)
 
 # output name
 add_executable(${TARGET_NAME})
@@ -27,7 +24,14 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -flto")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -flto")
 set(CMAKE_CXX_FLAGS_DEBUG "-g3 -O0")
 
-target_include_directories(${TARGET_NAME} PUBLIC src subprojects)
+include(CheckIncludeFileCXX)
+check_include_file_cxx(format HAVE_STDFORMAT_HEADER CMAKE_REQUIRED_QUIET)
+
+if(HAVE_STDFORMAT_HEADER)
+  target_include_directories(${TARGET_NAME} PUBLIC src subprojects)
+else()
+  target_include_directories(${TARGET_NAME} PUBLIC src subprojects polyfill)
+endif()
 
 set(HEADERS_COMMON
   src/common/common.h
@@ -51,7 +55,6 @@ src/bsl/bsl.cpp
 set(HEADERS_DECOMPILER
 src/decompile/symbols.h
 src/decompile/type.h
-src/decompile/util.h
 src/decompile/transform.h
 src/decompile/config.h
 src/decompile/decompile_private.h
@@ -68,7 +71,6 @@ src/binary.h
 src/header.h
 src/datamap.h
 src/segoff.h
-src/str.h
 src/dis86.h
 )
 

@@ -3,6 +3,8 @@
 #include "config.h"
 #include "value.h"
 
+#include <ostream>
+
 enum class addr_type_e
 {
   ADDR_TYPE_FAR,
@@ -20,9 +22,12 @@ struct addr_t
 
 struct operator_t
 {
-  const char * oper;
+  const char* oper;
   int          sign;
 };
+
+
+
 
 enum {
   EXPR_KIND_UNKNOWN,
