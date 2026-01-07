@@ -1,6 +1,10 @@
 #pragma once
 #include <stdlib.h>
 #include <stdarg.h>
+#include <cassert>
+#include <stdio.h>
+
+#include "header.h"
 
 typedef struct str str_t;
 struct str
@@ -27,7 +31,7 @@ static inline char *str_to_cstr(str_t *s)
   ret[s->idx] = 0;
 
   // invalid it
-  s->buf = NULL;
+  s->buf = nullptr;
   s->idx = 0;
   s->len = 0;
 
@@ -51,7 +55,7 @@ static inline void str_fmt(str_t *s, const char *fmt, ...)
     /* resize */
     s->len *= 2;
     s->buf = (char*)realloc(s->buf, s->len);
-    if (s->buf == NULL) FAIL("Failed to realloc buffer");
+    if (s->buf == nullptr) FAIL("Failed to realloc buffer");
   }
 }
 

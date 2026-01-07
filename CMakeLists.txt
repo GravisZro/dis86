@@ -29,6 +29,17 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g3 -O0")
 
 target_include_directories(${TARGET_NAME} PUBLIC src subprojects)
 
+set(HEADERS_COMMON
+  src/common/common.h
+  src/common/segment.h
+  src/common/dynarray.h
+)
+
+set(SOURCES_COMMON
+  src/common/common.cpp
+  src/common/dynarray.cpp
+)
+
 set(HEADERS_BSL
 src/bsl/bsl.h
 )
@@ -52,7 +63,6 @@ src/decompile/expr.h
 set(HEADERS_DISASSEMBLER
 src/array.h
 src/instr.h
-src/app/exec_mode.h
 src/cmdarg/cmdarg.h
 src/binary.h
 src/header.h
@@ -60,8 +70,6 @@ src/datamap.h
 src/segoff.h
 src/str.h
 src/dis86.h
-src/instr_tbl.h
-src/dis86_private.h
 )
 
 set(SOURCES_DECOMPILER
@@ -75,15 +83,24 @@ src/decompile/transform.cpp
 )
 
 set(SOURCES_DISASSEMBLER
-src/core.cpp
+src/dis86.cpp
 src/datamap.cpp
-src/app/dis86.cpp
-src/app/exec_mode_dis.cpp
-src/app/exec_mode_decomp.cpp
+src/app/main.cpp
+src/app/disassembler.cpp
+src/app/decompiler.cpp
 src/cmdarg/cmdarg.cpp
 src/print_intel_syntax.cpp
 src/instr.cpp
 src/decode.cpp
+)
+
+
+set(HEADERS_PLATFORM
+  src/platform/dos.h
+)
+
+set(SOURCES_PLATFORM
+  src/platform/dos.cpp
 )
 
 
@@ -92,4 +109,6 @@ target_sources(${TARGET_NAME} PUBLIC
   ${HEADERS_DISASSEMBLER} ${SOURCES_DISASSEMBLER}
   ${HEADERS_DECOMPILER} ${SOURCES_DECOMPILER}
   ${HEADERS_BSL} ${SOURCES_BSL}	
+  ${HEADERS_COMMON} ${SOURCES_COMMON}
+  ${HEADERS_PLATFORM} ${SOURCES_PLATFORM}
 )

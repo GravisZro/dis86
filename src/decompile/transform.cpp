@@ -168,7 +168,7 @@ void _synthesize_calls_one(meh_t *m, size_t i)
   memcpy(a->args, args, sizeof(args));
 
   // Remove the old exprs
-  dis86_instr_t *first_ins = NULL;
+  dis86_instr_t *first_ins = nullptr;
   size_t ins_count = 0;
   size_t n = (size_t)func->args + 1 + num_cleanup_ins;
   for (size_t j = 0; j < n; j++) {

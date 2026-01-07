@@ -35,7 +35,7 @@ static inline size_t array_len(array_t *arr)
 static inline void *array_at(array_t *arr, size_t idx)
 {
   assert(idx < arr->len);
-  return arr->mem + idx * arr->elt_sz;
+  return (void*)((uint8_t*)arr->mem + idx * arr->elt_sz);
 }
 
 static inline void *array_append_dst(array_t *arr)

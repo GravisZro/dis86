@@ -6,12 +6,27 @@
 #include <unistd.h>
 #include <stdint.h>
 
-#include "dis86_private.h"
 #include "decompile/config.h"
+#include "common/segment.h"
+
+#include "binary.h"
+#include "instr.h"
 
 /*****************************************************************/
 /* CORE TYPES */
 /*****************************************************************/
+struct dis86_t
+{
+  binary_t b[1];
+  dis86_instr_t ins[1];
+};
+
+
+enum {
+  RESULT_SUCCESS = 0,
+  RESULT_NEED_OPCODE2,
+  RESULT_NOT_FOUND,
+};
 
 
 /*****************************************************************/
@@ -19,7 +34,7 @@
 /*****************************************************************/
 
 /* Create new instance: deep copies the memory */
-dis86_t *dis86_new(size_t base_addr, char *mem, size_t mem_sz);
+dis86_t *dis86_new(size_t base_addr, segment<uint8_t> mem);
 
 /* Destroys an instance */
 void dis86_delete(dis86_t *d);

@@ -1,5 +1,5 @@
-#include "dis86_private.h"
-#include "instr_tbl.h"
+#include "dis86.h"
+#include "instr.h"
 
 // Register number to register enum
 static inline int reg8(uint8_t num)  { assert(num <= 7); return REG_AL + num; }
@@ -182,7 +182,7 @@ dis86_instr_t *dis86_next(dis86_t *d)
 
   size_t start_loc = binary_location(d->b);
   if (start_loc == binary_baseaddr(d->b) + binary_length(d->b)) {
-    return NULL; // Reached the end
+    return nullptr; // Reached the end
   }
 
   // First parse any prefixes
@@ -207,7 +207,7 @@ dis86_instr_t *dis86_next(dis86_t *d)
   int opcode1 = binary_fetch_uint8_t(d->b);
   int opcode2 = -1;
 
-  instr_fmt_t *fmt = NULL;
+  instr_fmt_t *fmt = nullptr;
   int ret = instr_fmt_lookup(opcode1, opcode2, &fmt);
 
   // Need a level 2 opcode to do lookup?
@@ -223,98 +223,99 @@ dis86_instr_t *dis86_next(dis86_t *d)
   }
 
   int need_modrm = 0;
-  operand_t * oper_reg8     = NULL;
-  operand_t * oper_reg16    = NULL;
-  operand_t * oper_sreg     = NULL;
-  operand_t * oper_rm8      = NULL;
-  operand_t * oper_rm16     = NULL;
-  operand_t * oper_m8       = NULL;
-  operand_t * oper_m16      = NULL;
-  operand_t * oper_m32      = NULL;
-  operand_t * oper_imm8     = NULL;
-  operand_t * oper_imm8_ext = NULL;
-  operand_t * oper_imm16    = NULL;
-  operand_t * oper_moff8    = NULL;
-  operand_t * oper_moff16   = NULL;
-  operand_t * oper_rel8     = NULL;
-  operand_t * oper_rel16    = NULL;
-  operand_t * oper_far32    = NULL;
+  operand_t * oper_reg8     = nullptr;
+  operand_t * oper_reg16    = nullptr;
+  operand_t * oper_sreg     = nullptr;
+  operand_t * oper_rm8      = nullptr;
+  operand_t * oper_rm16     = nullptr;
+  operand_t * oper_m8       = nullptr;
+  operand_t * oper_m16      = nullptr;
+  operand_t * oper_m32      = nullptr;
+  operand_t * oper_imm8     = nullptr;
+  operand_t * oper_imm8_ext = nullptr;
+  operand_t * oper_imm16    = nullptr;
+  operand_t * oper_moff8    = nullptr;
+  operand_t * oper_moff16   = nullptr;
+  operand_t * oper_rel8     = nullptr;
+  operand_t * oper_rel16    = nullptr;
+  operand_t * oper_far32    = nullptr;
 
   // Decode everything else
   ins->rep = rep;
   ins->opcode = fmt->op;
-  for (size_t i = 0; i < OPERAND_MAX; i++) {
-    int operand = (&fmt->operand1)[i];
-    if (operand == -1) break; // done
-
+  for (size_t i = 0; i < OPERAND_MAX; i++)
+  {
     // Process and locate all the operands
-    switch (operand) {
+    switch (fmt->operands[i])
+    {
+      case operand_e::None:
+        break;
       // Implied 16-bit register operands
-      case OPER_AX: ins->operand[i] = operand_reg(REG_AX); break;
-      case OPER_CX: ins->operand[i] = operand_reg(REG_CX); break;
-      case OPER_DX: ins->operand[i] = operand_reg(REG_DX); break;
-      case OPER_BX: ins->operand[i] = operand_reg(REG_BX); break;
-      case OPER_SP: ins->operand[i] = operand_reg(REG_SP); break;
-      case OPER_BP: ins->operand[i] = operand_reg(REG_BP); break;
-      case OPER_SI: ins->operand[i] = operand_reg(REG_SI); break;
-      case OPER_DI: ins->operand[i] = operand_reg(REG_DI); break;
+      case operand_e::AX: ins->operand[i] = operand_reg(REG_AX); break;
+      case operand_e::CX: ins->operand[i] = operand_reg(REG_CX); break;
+      case operand_e::DX: ins->operand[i] = operand_reg(REG_DX); break;
+      case operand_e::BX: ins->operand[i] = operand_reg(REG_BX); break;
+      case operand_e::SP: ins->operand[i] = operand_reg(REG_SP); break;
+      case operand_e::BP: ins->operand[i] = operand_reg(REG_BP); break;
+      case operand_e::SI: ins->operand[i] = operand_reg(REG_SI); break;
+      case operand_e::DI: ins->operand[i] = operand_reg(REG_DI); break;
 
       // Implied 8-bit register operands
-      case OPER_AL: ins->operand[i] = operand_reg(REG_AL); break;
-      case OPER_CL: ins->operand[i] = operand_reg(REG_CL); break;
-      case OPER_DL: ins->operand[i] = operand_reg(REG_DL); break;
-      case OPER_BL: ins->operand[i] = operand_reg(REG_BL); break;
-      case OPER_AH: ins->operand[i] = operand_reg(REG_AH); break;
-      case OPER_CH: ins->operand[i] = operand_reg(REG_CH); break;
-      case OPER_DH: ins->operand[i] = operand_reg(REG_DH); break;
-      case OPER_BH: ins->operand[i] = operand_reg(REG_BH); break;
+      case operand_e::AL: ins->operand[i] = operand_reg(REG_AL); break;
+      case operand_e::CL: ins->operand[i] = operand_reg(REG_CL); break;
+      case operand_e::DL: ins->operand[i] = operand_reg(REG_DL); break;
+      case operand_e::BL: ins->operand[i] = operand_reg(REG_BL); break;
+      case operand_e::AH: ins->operand[i] = operand_reg(REG_AH); break;
+      case operand_e::CH: ins->operand[i] = operand_reg(REG_CH); break;
+      case operand_e::DH: ins->operand[i] = operand_reg(REG_DH); break;
+      case operand_e::BH: ins->operand[i] = operand_reg(REG_BH); break;
 
       // Implied segment regsiter operands
-      case OPER_ES: ins->operand[i] = operand_reg(REG_ES); break;
-      case OPER_CS: ins->operand[i] = operand_reg(REG_CS); break;
-      case OPER_SS: ins->operand[i] = operand_reg(REG_SS); break;
-      case OPER_DS: ins->operand[i] = operand_reg(REG_DS); break;
+      case operand_e::ES: ins->operand[i] = operand_reg(REG_ES); break;
+      case operand_e::CS: ins->operand[i] = operand_reg(REG_CS); break;
+      case operand_e::SS: ins->operand[i] = operand_reg(REG_SS); break;
+      case operand_e::DS: ins->operand[i] = operand_reg(REG_DS); break;
 
       // Implied others
-      case OPER_FLAGS: ins->operand[i] = operand_reg(REG_FLAGS); break;
-      case OPER_LIT1:  ins->operand[i] = operand_imm8(1); break;
-      case OPER_LIT3:  ins->operand[i] = operand_imm8(3); break;
+      case operand_e::FLAGS: ins->operand[i] = operand_reg(REG_FLAGS); break;
+      case operand_e::LIT1:  ins->operand[i] = operand_imm8(1); break;
+      case operand_e::LIT3:  ins->operand[i] = operand_imm8(3); break;
 
       // Implied string operations operands
-      case OPER_SRC8:  ins->operand[i] = operand_src(SIZE_8);  break;
-      case OPER_SRC16: ins->operand[i] = operand_src(SIZE_16); break;
-      case OPER_DST8:  ins->operand[i] = operand_dst(SIZE_8);  break;
-      case OPER_DST16: ins->operand[i] = operand_dst(SIZE_16); break;
+      case operand_e::SRC8:  ins->operand[i] = operand_src(SIZE_8);  break;
+      case operand_e::SRC16: ins->operand[i] = operand_src(SIZE_16); break;
+      case operand_e::DST8:  ins->operand[i] = operand_dst(SIZE_8);  break;
+      case operand_e::DST16: ins->operand[i] = operand_dst(SIZE_16); break;
 
       // Explicit register operands
-      case OPER_R8:   need_modrm = 1; oper_reg8  = &ins->operand[i]; break;
-      case OPER_R16:  need_modrm = 1; oper_reg16 = &ins->operand[i]; break;
-      case OPER_SREG: need_modrm = 1; oper_sreg  = &ins->operand[i]; break;
+      case operand_e::R8:   need_modrm = 1; oper_reg8  = &ins->operand[i]; break;
+      case operand_e::R16:  need_modrm = 1; oper_reg16 = &ins->operand[i]; break;
+      case operand_e::SREG: need_modrm = 1; oper_sreg  = &ins->operand[i]; break;
 
       // Explicit memory operands
-      case OPER_M8:  need_modrm = 1; oper_m8  = &ins->operand[i]; break;
-      case OPER_M16: need_modrm = 1; oper_m16 = &ins->operand[i]; break;
-      case OPER_M32: need_modrm = 1; oper_m32 = &ins->operand[i]; break;
+      case operand_e::M8:  need_modrm = 1; oper_m8  = &ins->operand[i]; break;
+      case operand_e::M16: need_modrm = 1; oper_m16 = &ins->operand[i]; break;
+      case operand_e::M32: need_modrm = 1; oper_m32 = &ins->operand[i]; break;
 
       // Explicit register or memory operands (modrm)
-      case OPER_RM8:  need_modrm = 1; oper_rm8  = &ins->operand[i]; break;
-      case OPER_RM16: need_modrm = 1; oper_rm16 = &ins->operand[i]; break;
+      case operand_e::RM8:  need_modrm = 1; oper_rm8  = &ins->operand[i]; break;
+      case operand_e::RM16: need_modrm = 1; oper_rm16 = &ins->operand[i]; break;
 
       // Explicit immediate data
-      case OPER_IMM8:     oper_imm8     = &ins->operand[i]; break;
-      case OPER_IMM8_EXT: oper_imm8_ext = &ins->operand[i]; break;
-      case OPER_IMM16:    oper_imm16    = &ins->operand[i]; break;
+      case operand_e::IMM8:     oper_imm8     = &ins->operand[i]; break;
+      case operand_e::IMM8_EXT: oper_imm8_ext = &ins->operand[i]; break;
+      case operand_e::IMM16:    oper_imm16    = &ins->operand[i]; break;
 
       // Explicit far32 jump immediate
-      case OPER_FAR32: oper_far32 = &ins->operand[i]; break;
+      case operand_e::FAR32: oper_far32 = &ins->operand[i]; break;
 
       // Explicit 16-bit immediate used as a memory offset into DS
-      case OPER_MOFF8:  oper_moff8  = &ins->operand[i]; break;
-      case OPER_MOFF16: oper_moff16 = &ins->operand[i]; break;
+      case operand_e::MOFF8:  oper_moff8  = &ins->operand[i]; break;
+      case operand_e::MOFF16: oper_moff16 = &ins->operand[i]; break;
 
       // Explicit relative offsets (branching / calls)
-      case OPER_REL8:  oper_rel8  = &ins->operand[i]; break;
-      case OPER_REL16: oper_rel16 = &ins->operand[i]; break;
+      case operand_e::REL8:  oper_rel8  = &ins->operand[i]; break;
+      case operand_e::REL16: oper_rel16 = &ins->operand[i]; break;
 
       default:
         FAIL("Unexpected operand!");

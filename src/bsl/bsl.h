@@ -2,30 +2,61 @@
 
 /* BSL: Barebones Specification Language */
 
-#include <stdbool.h>
+#include <cstdint>
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct bsl      bsl_t;
-typedef struct bsl_iter bsl_iter_t;
-struct __attribute__((aligned(16))) bsl_iter { char _opaque[32]; };
+#include "common/dynarray.h"
 
-enum {
-  BSL_SUCCESS,
-  BSL_ERR_PARSE,
-};
+namespace bsl
+{
 
-enum {
-  BSL_TYPE_STR  = 0,  // char *
-  BSL_TYPE_NODE = 1,  // bsl_t *
-};
+  struct __attribute__((aligned(16))) iter_t { char _opaque[32]; };
 
-bsl_t *      bsl_parse_new(const char *buf, size_t sz, int *opt_err);
-void         bsl_delete(bsl_t *bsl);
 
-void *       bsl_get_generic(bsl_t *bsl, const char *key, int *opt_type);
-const char * bsl_get_str(bsl_t *bsl, const char *key);
-bsl_t *      bsl_get_node(bsl_t *bsl, const char *key);
+  enum class node_e : uint8_t
+  {
+    invalid = 255,
+    string  = 0,  // char *
+    node = 1,  // node_t *
+  };
 
-void         bsl_iter_begin(bsl_iter_t *it, bsl_t *bsl);
-bool         bsl_iter_next(bsl_iter_t *it, int *_type, const char **_key, void **_val);
+  union node_val_t
+  {
+    struct node_t* node;
+    char* string;
+  };
+
+  struct keyval_t
+  {
+    node_e  type; // BSL_TYPE_*
+    char*   key;
+    node_val_t val;
+  };
+
+  struct node_t
+  {
+    keyval_t * kv_arr;
+    size_t         kv_len;
+    size_t         kv_cap;
+    int            toplevel;
+  };
+
+  enum error_e
+  {
+    success,
+    parse_error,
+  };
+
+
+  node_t*  parse_new(const dynarray& buf, error_e *opt_err = nullptr);
+  void     free_node(node_t *bsl);
+
+  node_val_t get_generic(node_t *bsl, const char *key, node_e& type);
+  const char * get_str(node_t *bsl, const char *key);
+  node_t*  get_node(node_t *bsl, const char *key);
+
+  void         iter_begin(iter_t *it, node_t *bsl);
+  bool         iter_next(iter_t *it, node_e& _type, const char **_key, node_val_t& _val);
+
+}

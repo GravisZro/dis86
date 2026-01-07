@@ -15,25 +15,6 @@
 #define FAIL(...) do { fprintf(stderr, "FAIL: "); fprintf(stderr, __VA_ARGS__); fprintf(stderr, "\n"); exit(42); } while(0)
 #define UNIMPL() FAIL("UNIMPLEMENTED: %s:%d", __FILE__, __LINE__)
 
-static inline char *read_file(const char *filename, size_t *out_sz)
-{
-  FILE *fp = fopen(filename, "r");
-  if (!fp) FAIL("Failed to open: '%s'", filename);
-
-  fseek(fp, 0, SEEK_END);
-  size_t file_sz = ftell(fp);
-  fseek(fp, 0, SEEK_SET);
-
-  char *mem = (char*)malloc(file_sz);
-  if (!mem) FAIL("Failed to allocate");
-
-  size_t n = fread(mem, 1, file_sz, fp);
-  if (n != file_sz) FAIL("Failed to read");
-  fclose(fp);
-
-  if (out_sz) *out_sz = file_sz;
-  return mem;
-}
 
 static inline void hexdump(uint8_t *mem, size_t len)
 {

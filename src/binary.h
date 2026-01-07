@@ -1,26 +1,28 @@
 #include "header.h"
 
+#include "common/dynarray.h"
+
 struct binary_t
 {
-  uint8_t *   mem;
-  size_t len;
+  dynarray mem;
   size_t idx;
   size_t base_addr;
 };
 
-static inline void binary_init(binary_t *b, size_t base_addr, char *mem, size_t len)
+static inline void binary_init(binary_t *b, size_t base_addr, segment<uint8_t> mem)
 {
-  b->mem = (uint8_t*)malloc(len);
-  memcpy(b->mem, mem, len);
-  b->len = len;
+  b->mem.init(mem.size());
+  memcpy(b->mem.data(), mem.data(), b->mem.size());
   b->idx = base_addr;
   b->base_addr = base_addr;
 }
 
 static inline uint8_t binary_byte_at(binary_t *b, size_t idx)
 {
-  if (idx < b->base_addr) FAIL("Binary access below start of region");
-  if (idx >= b->base_addr + b->len) FAIL("Binary access beyond end of region");
+  if (idx < b->base_addr)
+    FAIL("Binary access below start of region");
+  if (idx >= b->base_addr + b->mem.size())
+    FAIL("Binary access beyond end of region");
   return b->mem[idx - b->base_addr];
 }
 
@@ -61,13 +63,13 @@ static inline size_t binary_location(binary_t *b)
 
 static inline size_t binary_length(binary_t *b)
 {
-  return b->len;
+  return b->mem.size();
 }
 
 static inline void binary_dump(binary_t *b)
 {
   printf("BINARY DUMP LOCATION %zx: ", b->idx);
-  size_t end = MIN(b->idx + 16, b->base_addr + b->len);
+  size_t end = MIN(b->idx + 16, b->base_addr + b->mem.size());
   for (size_t idx = b->idx; idx < end; idx++) {
     printf("%02x ", binary_byte_at(b, idx));
   }

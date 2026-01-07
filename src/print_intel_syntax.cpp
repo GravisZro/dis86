@@ -1,4 +1,4 @@
-#include "dis86_private.h"
+#include "dis86.h"
 #include "str.h"
 
 static void print_operand_intel_syntax(str_t *s, dis86_instr_t *ins, operand_t *o)
@@ -56,7 +56,7 @@ char *dis86_print_intel_syntax(dis86_t *d, dis86_instr_t *ins, bool with_detail)
   if (ins->rep == REP_NE) str_fmt(s, "repne ");
   else if (ins->rep == REP_E)  str_fmt(s, "rep ");
 
-  str_fmt(s, "%-5s", instr_op_mneumonic(ins->opcode));
+  str_fmt(s, "%-5s", instr_op_mneumonic[int(ins->opcode)]);
 
   int n_operands = 0;
   for (size_t i = 0; i < ARRAY_SIZE(ins->operand); i++) {

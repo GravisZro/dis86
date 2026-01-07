@@ -35,7 +35,7 @@ struct symtab_t
 
 struct symref_t
 {
-  sym_t * symbol;  // NULL if the ref doesn't point anywhere
+  sym_t * symbol;  // nullptr if the ref doesn't point anywhere
   uint16_t     off;     // offset into this symbol
   uint16_t     len;     // length from the offset
 };

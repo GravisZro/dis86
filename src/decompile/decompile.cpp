@@ -50,7 +50,7 @@ static decompiler_t * decompiler_new( dis86_t *                  dis,
   d->n_ins     = n_ins;
 
   d->symbols = symbols_new();
-  d->meh = NULL;
+  d->meh = nullptr;
   return d;
 }
 
@@ -202,7 +202,7 @@ static const char *short_name(const char *name, size_t off, size_t n_bytes)
       0 != strcmp(name, "BX") &&
       0 != strcmp(name, "CX") &&
       0 != strcmp(name, "DX")) {
-    return NULL;
+    return nullptr;
   }
 
   buf[0] = name[0];

@@ -1,9 +1,9 @@
-#include "dis86_private.h"
+#include "dis86.h"
 
-dis86_t *dis86_new(size_t base_addr, char *mem, size_t mem_sz)
+dis86_t *dis86_new(size_t base_addr, segment<uint8_t> mem)
 {
   dis86_t *d = (dis86_t*)calloc(1, sizeof(dis86_t));
-  binary_init(d->b, base_addr, mem, mem_sz);
+  binary_init(d->b, base_addr, mem);
   return d;
 }
 

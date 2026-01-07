@@ -1,5 +1,7 @@
 #include "datamap.h"
-#include <stdbool.h>
+
+#include "common/common.h"
+#include <cstdint>
 
 #define INITIAL_CAP 32
 
@@ -132,18 +134,19 @@ static inline void entry_commit(datamap_t *d, datamap_entry_t *ent)
   d->n_entries++;
 }
 
-datamap_t *datamap_load_from_mem(const char *str, size_t n)
+datamap_t *datamap_load_from_mem(const dynarray& mem)
 {
   size_t cap = INITIAL_CAP;
 
   datamap_t *d = (datamap_t*)calloc(1, sizeof(datamap_t));
   d->entries = (datamap_entry_t*)malloc(cap * sizeof(datamap_entry_t));
   d->n_entries = 0;
+  
 
-
-  const char *line = str;
-  const char *line_end = str;
-  while (*line) {
+  const char *line = reinterpret_cast<const char*>(mem.data());
+  const char *line_end = line;
+  while (*line)
+  {
     // Find next line
     while (*line_end && *line_end != '\n') line_end++;
 
@@ -152,7 +155,8 @@ datamap_t *datamap_load_from_mem(const char *str, size_t n)
     parser_init(p, line, line_end - line);
 
     // Advance the line
-    if (*line_end) line_end++;
+    if (*line_end)
+      line_end++;
     line = line_end;
 
     // Allow and ignore empty lines
@@ -175,12 +179,8 @@ datamap_t *datamap_load_from_mem(const char *str, size_t n)
 datamap_t *datamap_load_from_file(const char *filename)
 {
   size_t mem_sz = 0;
-  char * mem = read_file(filename, &mem_sz);
-
-  datamap_t *d = datamap_load_from_mem(mem, mem_sz);
-
-  free(mem);
-  return d;
+  dynarray mem = read_file(filename);
+  return datamap_load_from_mem(mem);
 }
 
 void datamap_delete(datamap_t *d)

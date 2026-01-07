@@ -1,7 +1,6 @@
 #pragma once
 #include "header.h"
-#include "dis86_private.h"
-#include "instr_tbl.h"
+#include "dis86.h"
 #include "util.h"
 #include "symbols.h"
 #include "config.h"

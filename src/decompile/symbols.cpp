@@ -21,7 +21,7 @@ bool sym_deduce(sym_t *s, operand_mem_t *m)
     s->kind = SYM_KIND_GLOBAL;
     s->off = off;
     s->len = len;
-    s->name = NULL;
+    s->name = nullptr;
     return true;
   }
 
@@ -31,12 +31,12 @@ bool sym_deduce(sym_t *s, operand_mem_t *m)
       s->kind = SYM_KIND_LOCAL;
       s->off = off;
       s->len = len;
-      s->name = NULL;
+      s->name = nullptr;
     } else {
       s->kind = SYM_KIND_PARAM;
       s->off = off;
       s->len = len;
-      s->name = NULL;
+      s->name = nullptr;
     }
     return true;
   }
@@ -218,7 +218,7 @@ void symtab_iter_begin(symtab_iter_t *_it, symtab_t *s)
 sym_t * symtab_iter_next(symtab_iter_t *_it)
 {
   iter_impl_t *it = (iter_impl_t*)_it;
-  if (it->idx >= it->s->n_var) return NULL;
+  if (it->idx >= it->s->n_var) return nullptr;
   return &it->s->var[it->idx++];
 }
 

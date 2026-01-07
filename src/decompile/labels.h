@@ -25,24 +25,24 @@ static uint32_t branch_destination(dis86_instr_t *ins)
 {
   int16_t rel = 0;
   switch (ins->opcode) {
-    case OP_JO:  rel = (int16_t)ins->operand[0].u.rel.val; break;
-    case OP_JNO: rel = (int16_t)ins->operand[0].u.rel.val; break;
-    case OP_JB:  rel = (int16_t)ins->operand[0].u.rel.val; break;
-    case OP_JAE: rel = (int16_t)ins->operand[0].u.rel.val; break;
-    case OP_JE:  rel = (int16_t)ins->operand[0].u.rel.val; break;
-    case OP_JNE: rel = (int16_t)ins->operand[0].u.rel.val; break;
-    case OP_JBE: rel = (int16_t)ins->operand[0].u.rel.val; break;
-    case OP_JA:  rel = (int16_t)ins->operand[0].u.rel.val; break;
-    case OP_JS:  rel = (int16_t)ins->operand[0].u.rel.val; break;
-    case OP_JNS: rel = (int16_t)ins->operand[0].u.rel.val; break;
-    case OP_JP:  rel = (int16_t)ins->operand[0].u.rel.val; break;
-    case OP_JNP: rel = (int16_t)ins->operand[0].u.rel.val; break;
-    case OP_JL:  rel = (int16_t)ins->operand[0].u.rel.val; break;
-    case OP_JGE: rel = (int16_t)ins->operand[0].u.rel.val; break;
-    case OP_JLE: rel = (int16_t)ins->operand[0].u.rel.val; break;
-    case OP_JG:  rel = (int16_t)ins->operand[0].u.rel.val; break;
-    case OP_JMP: rel = (int16_t)ins->operand[0].u.rel.val; break;
-    case OP_LOOP:rel = (int16_t)ins->operand[1].u.rel.val; break;
+    case operation_e::JO:  rel = (int16_t)ins->operand[0].u.rel.val; break;
+    case operation_e::JNO: rel = (int16_t)ins->operand[0].u.rel.val; break;
+    case operation_e::JB:  rel = (int16_t)ins->operand[0].u.rel.val; break;
+    case operation_e::JAE: rel = (int16_t)ins->operand[0].u.rel.val; break;
+    case operation_e::JE:  rel = (int16_t)ins->operand[0].u.rel.val; break;
+    case operation_e::JNE: rel = (int16_t)ins->operand[0].u.rel.val; break;
+    case operation_e::JBE: rel = (int16_t)ins->operand[0].u.rel.val; break;
+    case operation_e::JA:  rel = (int16_t)ins->operand[0].u.rel.val; break;
+    case operation_e::JS:  rel = (int16_t)ins->operand[0].u.rel.val; break;
+    case operation_e::JNS: rel = (int16_t)ins->operand[0].u.rel.val; break;
+    case operation_e::JP:  rel = (int16_t)ins->operand[0].u.rel.val; break;
+    case operation_e::JNP: rel = (int16_t)ins->operand[0].u.rel.val; break;
+    case operation_e::JL:  rel = (int16_t)ins->operand[0].u.rel.val; break;
+    case operation_e::JGE: rel = (int16_t)ins->operand[0].u.rel.val; break;
+    case operation_e::JLE: rel = (int16_t)ins->operand[0].u.rel.val; break;
+    case operation_e::JG:  rel = (int16_t)ins->operand[0].u.rel.val; break;
+    case operation_e::JMP: rel = (int16_t)ins->operand[0].u.rel.val; break;
+    case operation_e::LOOP:rel = (int16_t)ins->operand[1].u.rel.val; break;
     default: return 0;
   }
 

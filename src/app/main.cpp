@@ -1,6 +1,14 @@
 #include <stdio.h>
 #include <string.h>
-#include "exec_mode.h"
+
+namespace disassembler
+{
+  extern int main(int argc, char *argv[]);
+}
+namespace decompiler
+{
+  extern int main(int argc, char *argv[]);
+}
 
 static void print_help(FILE *f, const char *appname)
 {
@@ -20,8 +28,8 @@ int main(int argc, char *argv[])
   const char *mode = argv[1];
 
   if (0) {}
-  else if (0 == strcmp(mode, "dis"))    return exec_mode_dis(argc, argv);
-  else if (0 == strcmp(mode, "decomp")) return exec_mode_decomp(argc, argv);
+  else if (0 == strcmp(mode, "dis"))    return disassembler::main(argc, argv);
+  else if (0 == strcmp(mode, "decomp")) return decompiler::main(argc, argv);
 
   fprintf(stderr, "Error: Unknown mode '%s'", mode);
   print_help(stderr, argv[0]);
