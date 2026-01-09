@@ -1,0 +1,76 @@
+cmake_minimum_required(VERSION 3.16)
+
+set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON" FORCE)
+
+set(TARGET_NAME "dis86")
+
+project(${TARGET_NAME}
+    DESCRIPTION ${TARGET_NAME}
+    LANGUAGES C CXX
+)
+
+set(CMAKE_INCLUDE_CURRENT_DIR OFF)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED OFF)
+
+# output name
+add_executable(${TARGET_NAME})
+
+# complier and linker flags
+
+set(CMAKE_CXX_FLAGS "-Wall")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -flto")
+set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -flto")
+set(CMAKE_CXX_FLAGS_DEBUG "-g3 -O0")
+
+include(CheckIncludeFileCXX)
+check_include_file_cxx(format HAVE_STDFORMAT_HEADER CMAKE_REQUIRED_QUIET)
+
+if(HAVE_STDFORMAT_HEADER)
+  target_include_directories(${TARGET_NAME} PUBLIC src subprojects)
+else()
+  target_include_directories(${TARGET_NAME} PUBLIC src subprojects polyfill)
+endif()
+
+set(HEADERS_COMMON
+  src/common/common.h
+  src/common/segment.h
+  src/common/dynarray.h
+)
+
+set(SOURCES_COMMON
+  src/common/common.cpp
+  src/common/dynarray.cpp
+)
+
+
+set(HEADERS
+  src/segoff.h
+  src/asm/instr.h
+  src/asm/instr_fmt.h
+  src/asm/decode.h
+)
+
+set(SOURCES
+  src/asm/instr.cpp
+  src/asm/instr_fmt.cpp
+  src/asm/decode.cpp
+)
+
+
+set(HEADERS_PLATFORM
+  src/platform/dos.h
+)
+
+set(SOURCES_PLATFORM
+  src/platform/dos.cpp
+)
+
+
+
+target_sources(${TARGET_NAME} PUBLIC
+  ${HEADERS} ${SOURCES}
+  ${HEADERS_COMMON} ${SOURCES_COMMON}
+  ${HEADERS_PLATFORM} ${SOURCES_PLATFORM}
+)
