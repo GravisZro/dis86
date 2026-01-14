@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 
+
+SET(RUN_TESTS "option_value" OFF CACHE BOOL "Run validation tests?")
+
 set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON" FORCE)
 
 set(TARGET_NAME "dis86")
@@ -33,31 +36,58 @@ else()
   target_include_directories(${TARGET_NAME} PUBLIC src subprojects polyfill)
 endif()
 
-set(HEADERS_COMMON
-  src/common/common.h
+set(COMMON_HEADERS
   src/common/segment.h
+  src/common/expanded_base.h
+  src/common/result.h
   src/common/dynarray.h
 )
 
-set(SOURCES_COMMON
-  src/common/common.cpp
+set(COMMON_SOURCES
   src/common/dynarray.cpp
 )
 
-
-set(HEADERS
+set(ASM_HEADERS
+  src/region.h
   src/segoff.h
   src/asm/instr.h
   src/asm/instr_fmt.h
   src/asm/decode.h
+  src/asm/intel_syntax.h
 )
 
-set(SOURCES
+set(ASM_SOURCES
+  src/region.cpp
+  src/segoff.cpp
   src/asm/instr.cpp
   src/asm/instr_fmt.cpp
   src/asm/decode.cpp
+  src/asm/intel_syntax.cpp
 )
 
+
+set(HEADERS
+  src/bsl/bsl.h
+  src/types.h
+  src/config.h
+  src/region.h
+  src/segoff.h
+)
+
+set(SOURCES
+  src/bsl/bsl.cpp
+  src/types.cpp
+  src/config.cpp
+  src/region.cpp
+  src/segoff.cpp
+)
+
+if(RUN_TESTS)
+  add_definitions(-DENABLE_TESTS)
+  set(TEST_SOURCES
+    src/bsl/bsl_test.cpp
+    src/test.cpp)
+endif()
 
 set(HEADERS_PLATFORM
   src/platform/dos.h
@@ -70,7 +100,9 @@ set(SOURCES_PLATFORM
 
 
 target_sources(${TARGET_NAME} PUBLIC
+  ${COMMON_HEADERS} ${COMMON_SOURCES}
   ${HEADERS} ${SOURCES}
-  ${HEADERS_COMMON} ${SOURCES_COMMON}
-  ${HEADERS_PLATFORM} ${SOURCES_PLATFORM}
+  ${ASM_HEADERS} ${ASM_SOURCES}
+
+  ${TEST_SOURCES}
 )

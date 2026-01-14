@@ -1,73 +1,67 @@
 #pragma once
 
 #include <cstdint>
-#include <cassert>
 #include <unistd.h>
-#include <variant>
 #include <string>
-#include <format>
-#include <regex>
 
-#define panic(...)
+#include "common/result.h"
 
-using Off_t = uint16_t;
-using Seg_t = uint16_t;
-
-struct SegOff_t
+namespace segoff
 {
-  enum type_e
+  class Seg_t
   {
-    Normal,
-    Overlay,
+  public:
+    enum type_e : uint8_t
+    {
+      Normal,
+      Overlay,
+    };
+
+    Seg_t(type_e t, uint16_t v) : type(t), value(v) { }
+    Seg_t(const Seg_t&) = default;
+
+    constexpr bool operator ==(const Seg_t& o) const
+      { return o.type == type && o.value == value; }
+
+    explicit constexpr operator type_e(void) const { return type; }
+    constexpr operator uint16_t (void) const { return value; }
+
+    uint16_t unwrap_normal(void) const;
+    uint16_t unwrap_overlay(void) const;
+
+  private:
+    type_e type;
+    uint16_t value;
   };
 
-  SegOff_t(SegOff_t&&) = default;
-  SegOff_t(SegOff_t::type_e t, Seg_t s, Off_t o)
-      : type(t), seg(s), off(o) { }
-  SegOff_t(void) : SegOff_t(Overlay, 0, 0) { }
-  //constexpr SegOff_t& operator =(SegOff_t&&) = default;
+  using Off_t = uint16_t;
 
-  type_e type;
-  Seg_t seg;
-  Off_t off;
-
-
-  size_t abs_normal(void) const
+  struct SegOff_t
   {
-    assert(type == Normal);
-    return size_t(seg) * 16 + off;
-  }
+    SegOff_t(Seg_t s, Off_t o) : seg(s), off(o) { }
+    SegOff_t(void) : seg(Seg_t::Normal, 0), off(0) { }
 
-  bool is_overlay_addr(void) const { return type == Overlay; }
+    Seg_t seg;
+    Off_t off;
 
-  SegOff_t add_offset(uint16_t offset) const
-    { return { type, seg, uint16_t(off + offset) }; }
+    size_t abs_normal(void) const
+      { return size_t(seg.unwrap_normal()) + off; }
 
+    bool is_overlay_addr(void) const { return seg == Seg_t::Overlay; }
 
-  uint16_t offset_to(const SegOff_t& other)
-  {
-    if(seg != other.seg) { panic("Cannot take difference of different segments"); }
-    if(off > other.off) { panic("Not a positive offset"); }
-    return other.off - off;
-  }
+    SegOff_t add_offset(uint16_t offset) const
+      { return SegOff_t { seg, Off_t(off + offset) }; }
 
-  std::variant<SegOff_t, std::string> from_str(std::string s)
-  {
-    const std::regex segoff_regex ("^([[:xdigit:]]{4}):([[:xdigit:]]{4})$");
-    const std::regex overlay_regex("^([[:xdigit:]]{2}):([[:xdigit:]]{4})$");
-    std::smatch match;
-    if (std::regex_match(s, match, segoff_regex) && match.size() == 3)
-      return SegOff_t { Overlay, uint16_t(std::stoi(match[1].str())), uint16_t(std::stoi(match[2].str())) };
-    if (std::regex_match(s, match, overlay_regex) && match.size() == 3)
-      return SegOff_t { Normal, uint16_t(std::stoi(match[1].str())), uint16_t(std::stoi(match[2].str())) };
-    return std::format<"Invalid segoff: '{}'">(s);
-  }
+    uint16_t offset_to(const SegOff_t& other);
 
-  operator std::string(void) const
-  {
-    if(type == Overlay)
-      return std::format<"%04x:%04x">(seg, off);
-    else
-      return std::format<"%02x:%04x">(seg, off);
-  }
-};
+    static Result<SegOff_t, std::string> from_str(std::string s);
+
+    std::string to_str(void) const;
+
+    bool operator > (const SegOff_t& o) const { return seg > o.seg || (seg == o.seg && off > o.off); }
+    bool operator < (const SegOff_t& o) const { return seg < o.seg || (seg == o.seg && off < o.off); }
+    bool operator ==(const SegOff_t& o) const { return seg == o.seg && off == o.off; }
+    bool operator >=(const SegOff_t& o) const { return operator >(o) || operator ==(o); }
+    bool operator <=(const SegOff_t& o) const { return operator <(o) || operator ==(o); }
+  };
+}
