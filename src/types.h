@@ -53,6 +53,7 @@ namespace types
     Type(int16_t) : type(I16) { }
     Type(int32_t) : type(I32) { }
 
+    Type(type_e t) : type(t) { }
     Type(const array_t& o) : type(Array), array(o) { }
     Type(const std::shared_ptr<Type>& o) : type(Ptr), ptr(o) { }
     Type(const StructRef& o) : type(Struct), structref(o) { }

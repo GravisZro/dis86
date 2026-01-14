@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <filesystem>
 
 #include "types.h"
 #include "segoff.h"
@@ -66,7 +67,7 @@ namespace config
   class Config
   {
   public:
-    static Result<Config, std::string> from_path(const std::string& path);
+    static Result<Config, std::string> from_path(const std::filesystem::path& path);
 
     types::Builder type_builder;
     std::vector<Struct> structs;
@@ -89,23 +90,3 @@ namespace config
     Result<std::nullptr_t, std::string> parse_text_section(std::shared_ptr<bsl::node_t> root);
   };
 }
-#if 0
-
-// parse("0x1234") -> 4660
-fn parse_hex_uint16_t(s: &str) -> Result<uint16_t, &'static str> {
-  if !s.starts_with("0x") {
-    return Err("Expected 0x prefix");
-  } else {
-    crate::util::parse::hex_uint16_t(&s[2..])
-  }
-}
-
-// parse number: either decimal or hex
-fn parse_uint16_t(s: &str) -> Result<uint16_t, std::string> {
-  if s.starts_with("0x") {
-    parse_hex_uint16_t(s).map_err(|err| err.to_string())
-  } else {
-    s.parse().map_err(|err: std::num::ParseIntError| err.to_string())
-  }
-}
-#endif

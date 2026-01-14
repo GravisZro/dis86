@@ -67,6 +67,7 @@ namespace types
       case type_e::Unknown:
         return "?unknown_type?";
     }
+    return "Invalid value!";
   }
 
   Builder::Builder(void)
