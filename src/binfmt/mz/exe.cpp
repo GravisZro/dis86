@@ -9,7 +9,7 @@ namespace binfmt::mz
 
   segment<uint8_t> Exe::exe_data(void) const
   {
-    return segment<uint8_t> { rawdata.ptr_at(exe_start),
+    return segment<uint8_t> { const_cast<uint8_t*>(&rawdata[exe_start]),
                             exe_end - exe_start };
   }
 
@@ -19,7 +19,7 @@ namespace binfmt::mz
     const OverlaySeg& seg = ovr->segs[id];
     std::size_t start = ovr->file_offset + seg.data_offset;
     std::size_t end = start + seg.segment_size;
-    return segment<uint8_t> { rawdata.ptr_at(start),
+    return segment<uint8_t> { const_cast<uint8_t*>(&rawdata[exe_start]),
                             end - start };
   }
 
@@ -33,12 +33,10 @@ namespace binfmt::mz
 
   //==== decode functions below ====
 
-  Result<Header*, std::string> decode_hdr(segment<uint8_t> data)
+  Result<Header*, std::string> decode_hdr(void* data)
   {
     // Get the header and perform magic check
-    if(data.size() < sizeof(Exe))
-      return "Insufficient data for executable"s;
-    Header* header = reinterpret_cast<Header*>(data.data());
+    Header* header = reinterpret_cast<Header*>(data);
     if(header->signature[0] != 'M' ||
         header->signature[1] != 'Z')
       return std::format("Magic number mismatch: got {}{}, expected MZ", header->signature[0], header->signature[1]);
@@ -57,12 +55,17 @@ namespace binfmt::mz
     return header;
   }
 
-  Result<Exe, std::string> Exe::decode(segment<uint8_t> data)
+  Result<Exe, std::string> Exe::decode(std::vector<uint8_t>&& rawdata)
   {
     Exe rval;
-    rval.rawdata = data;
+    rval.rawdata = std::move(rawdata);
 
-    auto hdr = decode_hdr(data); // Decode the header
+
+    if(rawdata.size() < sizeof(Header))
+      return "Insufficient data for executable"s;
+    segment<uint8_t> data = { rval.rawdata.data(), rval.rawdata.size() };
+
+    auto hdr = decode_hdr(rval.rawdata.data()); // Decode the header
     if(hdr.is_err())
       return hdr.error();
     rval.hdr = *hdr;

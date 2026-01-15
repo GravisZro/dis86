@@ -5,6 +5,7 @@
 #include <fstream>
 
 #include "common/print.h"
+#include "common/fileio.h"
 
 namespace config
 {
@@ -77,29 +78,11 @@ namespace config
     return text_region_lookup_by_access(access);
   }
 
-  // simple file reader
-  Result<std::string, std::error_code> read_file(const std::filesystem::path& path)
-  {
-    std::error_code ec;
-    if(!std::filesystem::exists(path, ec) || ec)
-      return ec;
-
-    const auto sz = std::filesystem::file_size(path, ec);
-    if(ec)
-      return ec;
-
-    std::ifstream file(path, std::ios::in | std::ios::binary);
-    std::string result(sz, '\0');
-    file.read(result.data(), sz);
-    return result;
-  }
-
-
   Result<Config, std::string> Config::from_path(const std::filesystem::path& path)
   {
     Config cfg;
 
-    auto data = read_file(path);
+    auto data = read_file<std::string>(path);
     if(data.is_err())
       return data.error().message();
 

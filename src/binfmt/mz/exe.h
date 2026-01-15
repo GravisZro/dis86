@@ -16,13 +16,13 @@ namespace binfmt::mz
     FBOV* fbov = nullptr;
     segment<SegInfo> seginfo;
     std::optional<overlay::OverlayInfo> ovr;
-    segment<uint8_t> rawdata;
+    std::vector<uint8_t> rawdata;
 
     segment<uint8_t> exe_data(void) const;
     segment<uint8_t> overlay_data(std::size_t id) const;
     std::size_t num_overlay_segments(void) const;
 
-    static Result<Exe, std::string> decode(segment<uint8_t> data);
+    static Result<Exe, std::string> decode(std::vector<uint8_t>&& rawdata);
 
     void print_hdr(void) const;
     void print_relocs(segment<Reloc> relocs) const;

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <format>
 #include <string_view>
+#include <cassert>
 
 template<typename... Args>
 void println(std::string_view fmt, Args... args)
@@ -16,4 +17,11 @@ void print(std::string_view fmt, Args... args)
 {
   std::cout << std::format(fmt, args...);
   std::cout.flush();
+}
+
+template<typename... Args>
+void panic(std::string_view fmt, Args... args)
+{
+  println(fmt, args...);
+  assert(false);
 }

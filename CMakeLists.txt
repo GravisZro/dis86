@@ -40,6 +40,7 @@ set(COMMON_HEADERS
   src/common/segment.h
   src/common/expanded_base.h
   src/common/result.h
+  src/common/fileio.h
   src/common/dynarray.h
 )
 
@@ -80,16 +81,20 @@ set(BINFMT_SOURCES
 
 set(HEADERS
   src/bsl/bsl.h
+  src/binary.h
   src/types.h
   src/config.h
+  src/spec.h
   src/region.h
   src/segoff.h
 )
 
 set(SOURCES
   src/bsl/bsl.cpp
+  src/binary.cpp
   src/types.cpp
   src/config.cpp
+  src/spec.cpp
   src/region.cpp
   src/segoff.cpp
 )
