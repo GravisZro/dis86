@@ -78,7 +78,6 @@ namespace region
 
 
 #ifdef ENABLE_TESTS
-#include <cassert>
 #include "common/print.h"
 
 namespace region

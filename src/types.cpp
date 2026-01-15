@@ -114,11 +114,11 @@ namespace types
     std::size_t array_start = s.find('[');
     std::size_t array_end = s.find(']', array_start);
     if(array_start == std::string::npos)
-      return "No opening an array bracket"s;
+      return "No opening array bracket"s;
     if(array_end == std::string::npos)
-      return "No closing an array bracket"s;
+      return "No closing array bracket"s;
     if(array_end != s.size() - 1)
-      return "Array closing bracket isn't at the end of the type"s;
+      return "Closing array bracket isn't at the end of the type"s;
 
     std::string base_str = s.substr(0, array_start);
     std::string size_str = s.substr(array_start + 1, array_end);
@@ -132,7 +132,7 @@ namespace types
     {
       try { sz = std::stoul(size_str, nullptr, 0); }
       catch (...)
-        { return "Cannot parse array size: "s + size_str; }
+        { return std::format("Cannot parse array size: {}",  size_str); }
     }
     if(!sz)
       return { Type::array_t { base_type, ArraySize { false, 0 } } };

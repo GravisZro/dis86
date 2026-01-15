@@ -81,7 +81,7 @@ namespace overlay
       uint32_t* dat = exe_data + 16 * s.seg;
       std::size_t sz = s.maxoff;
       assert(sz >= 32); // each hdr section is 32-bytes
-      assert((sz-32) % 5 == 0); // each launcher entry is 5 bytes
+      assert((sz - 32) % 5 == 0); // each launcher entry is 5 bytes
       std::size_t num_entries = (sz - 32) / 5;
 
       // get the seg struct
