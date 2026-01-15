@@ -33,7 +33,7 @@ namespace intel_syntax
         if(!oper.mem.reg1 && !oper.mem.reg2)
         {
           if(oper.mem.off)
-            s += std::format("{:x}", *oper.mem.off);
+            s += std::format("{:#x}", *oper.mem.off);
         }
         else
         {
@@ -49,23 +49,23 @@ namespace intel_syntax
           if(oper.mem.off)
           {
             int16_t disp = std::bit_cast<int16_t>(*oper.mem.off);
-            if (disp >= 0) { s += std::format("+{:x}", disp); }
-            else           { s += std::format("-{:x}", -disp); }
+            if (disp >= 0) { s += std::format("+{:#x}", disp); }
+            else           { s += std::format("-{:#x}", -disp); }
           }
           s += "]";
         }
         break;
 
       case Operand_t::Imm:
-        s += std::format("{:x}", oper.imm.val);
+        s += std::format("{:#x}", oper.imm.val);
         break;
 
       case Operand_t::Rel:
-        s += std::format("{:x}", ins.rel_addr(oper.rel).off);
+        s += std::format("{:#x}", ins.rel_addr(oper.rel).off);
         break;
 
       case Operand_t::Far:
-        s += std::format("{:x}:{:x}", oper.far.seg, oper.far.off);
+        s += std::format("{:#x}:{:#x}", oper.far.seg, oper.far.off);
         break;
     };
   }
@@ -77,7 +77,7 @@ namespace intel_syntax
     {
       s += std::format("{}:\t", ins.addr.to_str());
       for(std::size_t i = 0; i < bytes.size(); i++)
-        s += std::format("{:02x} ", bytes[i]);
+        s += std::format("{:#02x} ", bytes[i]);
       std::size_t used = bytes.size() * 3;
       std::size_t remain = (used <= 21) ? 21 - used : 0;
       s += std::format("{}\t", remain);
@@ -115,7 +115,7 @@ namespace intel_syntax
     {
       s += std::format("{}:\t", addr.to_str());
       for(std::size_t i = 0; i < bytes.size(); i++)
-        s += std::format("{:02x} ", bytes[i]);
+        s += std::format("{:#02x} ", bytes[i]);
       std::size_t used = bytes.size() * 3;
       std::size_t remain = (used <= 21) ? 21 - used : 0;
       s += std::to_string(remain) + '\t';
