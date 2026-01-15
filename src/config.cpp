@@ -2,11 +2,14 @@
 
 #include <format>
 #include <charconv>
-#include <iostream>
 #include <fstream>
+
+#include "common/print.h"
 
 namespace config
 {
+  using namespace std::string_literals;
+
   std::optional<Func> Config::func_lookup(SegOff_t addr) const
   {
     // TODO: Consider something better than linear search
@@ -126,45 +129,45 @@ namespace config
   {
     auto topnode = root->get_node("dis86.structures");
     if(!topnode)
-      return std::string("Failed to get the structures node");
+      return "Failed to get the structures node"s;
 
     for(const auto& kv : topnode->kv_arr)
     {
       auto struct_props = kv.as_node();
       if(!struct_props)
-        return std::string("Expected structure properties");
+        return "Expected structure properties"s;
       auto sz = struct_props->get_str("size");
       if(!sz)
-        return std::format<"No function 'size' property for '{}'">(kv.key);
+        return std::format("No function 'size' property for '{}'", kv.key);
 
       uint16_t size = 0;
       if (auto result = std::from_chars(sz->data(), sz->data() + sz->size(), size);
           result.ec == std::errc::invalid_argument)
-        return std::format<"Expected uint16_t for '{}.start', got '{}'">(kv.key, *sz);
+        return std::format("Expected uint16_t for '{}.start', got '{}'", kv.key, *sz);
 
       auto members = struct_props->get_node("members");
       if(!members)
-        return std::format<"Expected {}.members node">(kv.key);
+        return std::format("Expected {}.members node", kv.key);
 
       std::vector<StructMember> member_data;
       for(const auto& mbr_kv : members->kv_arr)
       {
         auto member_node = mbr_kv.as_node();
         if(!member_node)
-          return std::format<"Expected member properties for {}.members.{}">(kv.key, mbr_kv.key);
+          return std::format("Expected member properties for {}.members.{}", kv.key, mbr_kv.key);
 
         auto off_str = member_node->get_str("off");
         if(!off_str)
-          return std::format<"No 'off' property for '{}.members.{}'">(kv.key, mbr_kv.key);
+          return std::format("No 'off' property for '{}.members.{}'", kv.key, mbr_kv.key);
 
         auto type_str = member_node->get_str("type");
         if(!type_str)
-          return std::format<"No 'type' property for '{}.members.{}'">(kv.key, mbr_kv.key);
+          return std::format("No 'type' property for '{}.members.{}'", kv.key, mbr_kv.key);
 
         uint16_t off = 0;
         if (auto result = std::from_chars(off_str->data(), off_str->data() + off_str->size(), off);
             result.ec == std::errc::invalid_argument)
-          return std::format<"Expected uint16_t hex for '{}.members.{}.off', got '{}'">(kv.key, mbr_kv.key, *off_str);
+          return std::format("Expected uint16_t hex for '{}.members.{}.off', got '{}'", kv.key, mbr_kv.key, *off_str);
 
         auto typ = type_builder.parse_type(*type_str);
         if(typ.is_err())
@@ -182,33 +185,33 @@ namespace config
   {
     auto topnode = root->get_node("dis86.structures");
     if(!topnode)
-      return std::string("Failed to get the functions node");
+      return "Failed to get the functions node"s;
 
     for(const auto& kv : topnode->kv_arr)
     {
       auto func_props = kv.as_node();
       if(!func_props)
-        return std::string("Expected function properties");
+        return "Expected function properties"s;
 
       auto start_str = func_props->get_str("start");
       if(!start_str)
-        return std::format<"No function 'start' property for '{}'">(kv.key);
+        return std::format("No function 'start' property for '{}'", kv.key);
 
       auto end_str = func_props->get_str("end");
       if(!end_str)
-        return std::format<"No function 'end' property for '{}'">(kv.key);
+        return std::format("No function 'end' property for '{}'", kv.key);
 
       auto mode_str = func_props->get_str("mode");
       if(!mode_str)
-        return std::format<"No function 'mode' property for '{}'">(kv.key);
+        return std::format("No function 'mode' property for '{}'", kv.key);
 
       auto ret_str = func_props->get_str("ret");
       if(!ret_str)
-        return std::format<"No function 'ret' property for '{}'">(kv.key);
+        return std::format("No function 'ret' property for '{}'", kv.key);
 
       auto args_str = func_props->get_str("args");
       if(!args_str)
-        return std::format<"No function 'args' property for '{}'">(kv.key);
+        return std::format("No function 'args' property for '{}'", kv.key);
 
       auto dont_pop_args = func_props->get_str("dont_pop_args");
       auto indirect      = func_props->get_str("indirect_call_location");
@@ -219,14 +222,14 @@ namespace config
 
       auto start = SegOff_t::from_str(start_str.value());
       if(start.is_err())
-        return std::format<"Expected segoff for '{}.start', got '{}'">(kv.key, *start_str);
+        return std::format("Expected segoff for '{}.start', got '{}'", kv.key, *start_str);
 
       SegOff_t end;
       if(!start_str->empty())
       {
         auto rval = SegOff_t::from_str(*start_str);
         if(rval.is_err())
-          return std::format<"Expected segoff for '{}.end', got '{}'">(kv.key, *start_str);
+          return std::format("Expected segoff for '{}.end', got '{}'", kv.key, *start_str);
         end = rval.value();
       }
 
@@ -236,18 +239,18 @@ namespace config
       else if(*mode_str == "far")
         mode = CallMode::Near;
       else
-        return std::format<"Unsupported mode '{}'">(*mode_str);
+        return std::format("Unsupported mode '{}'", *mode_str);
 
       std::optional<uint16_t> args = 0;
       if (auto result = std::from_chars(args_str->data(), args_str->data() + args_str->size(), *args);
           result.ec == std::errc::invalid_argument)
-        return std::format<"Expected uint16_t for '{}.args', got '{}'">(kv.key, *args_str);
+        return std::format("Expected uint16_t for '{}.args', got '{}'", kv.key, *args_str);
       if(!*args)
         args.reset();
 
       auto ret = type_builder.parse_type(*ret_str);
       if(ret.is_err())
-        return std::format<"Expected type for '{}.ret', got '{}' | {}">(kv.key, *ret_str, ret.error());
+        return std::format("Expected type for '{}.ret', got '{}' | {}", kv.key, *ret_str, ret.error());
 
       std::optional<OverlayRange> overlay;
       if(overlay_num && overlay_start && overlay_end)
@@ -255,31 +258,31 @@ namespace config
         uint16_t num = 0, start = 0, end = 0;
         if (auto result = std::from_chars(overlay_num->data(), overlay_num->data() + overlay_num->size(), num);
             result.ec == std::errc::invalid_argument)
-          return std::format<"Expected uint16_t for '{}.overlay_num', got '{}'">(kv.key, *overlay_num);
+          return std::format("Expected uint16_t for '{}.overlay_num', got '{}'", kv.key, *overlay_num);
 
         if (auto result = std::from_chars(overlay_start->data(), overlay_start->data() + overlay_start->size(), num);
             result.ec == std::errc::invalid_argument)
-          return std::format<"Expected uint16_t for '{}.overlay_start', got '{}'">(kv.key, *overlay_start);
+          return std::format("Expected uint16_t for '{}.overlay_start', got '{}'", kv.key, *overlay_start);
 
         if (auto result = std::from_chars(overlay_end->data(), overlay_end->data() + overlay_end->size(), num);
             result.ec == std::errc::invalid_argument)
-          return std::format<"Expected uint16_t for '{}.overlay_end', got '{}'">(kv.key, *overlay_end);
+          return std::format("Expected uint16_t for '{}.overlay_end', got '{}'", kv.key, *overlay_end);
 
         overlay = OverlayRange { num, start, end };
       }
       else if (overlay_num || overlay_start || overlay_end)
-        return std::format<"Overlay options only partially set for '{}'">(kv.key);
+        return std::format("Overlay options only partially set for '{}'", kv.key);
 
       std::vector<Register_t> registers;
       if(regargs)
       {
-        size_t start = 0, end = 0;
+        std::size_t start = 0, end = 0;
         do
         {
           end = regargs->find(',', start);
           auto regstr = regargs->substr(start, end - start);
           if(auto reg = Register_t::from_str_upper(regstr); !reg)
-            return std::format<"Failed to parse register name: {}">(regstr);
+            return std::format("Failed to parse register name: {}", regstr);
           else
             registers.emplace_back(*reg);
           start = end + 1;
@@ -299,7 +302,7 @@ namespace config
         indirects.emplace_back(Indirect{ *start, *ret, (args ? *args : uint16_t(0)) });
       }
       else
-        return std::format<"Cannot have an indirect near call: {}">(kv.key);
+        return std::format("Cannot have an indirect near call: {}", kv.key);
     }
     return { nullptr };
   }
@@ -308,31 +311,31 @@ namespace config
   {
     auto topnode = root->get_node("dis86.globals");
     if(!topnode)
-      return std::string("Failed to get the globals node");
+      return "Failed to get the globals node"s;
 
     for(const auto& kv : topnode->kv_arr)
     {
       auto glob_props = kv.as_node();
       if(!glob_props)
-        return std::string("Expected global properties");
+        return "Expected global properties"s;
 
       auto off_str = glob_props->get_str("off");
       if(!off_str)
-        return std::format<"No global 'off' property for '{}'">(kv.key);
+        return std::format("No global 'off' property for '{}'", kv.key);
 
       auto type_str = glob_props->get_str("type");
       if(!type_str)
-        return std::format<"No global 'type' property for '{}'">(kv.key);
+        return std::format("No global 'type' property for '{}'", kv.key);
 
       uint16_t off = 0;
       if (auto result = std::from_chars(off_str->data(), off_str->data() + off_str->size(), off);
           result.ec == std::errc::invalid_argument)
-        return std::format<"Expected uint16_t hex for '{}.off', got '{}'">(kv.key, *off_str);
+        return std::format("Expected uint16_t hex for '{}.off', got '{}'", kv.key, *off_str);
 
       auto typ = type_builder.parse_type(*type_str);
       if(typ.is_err()) // FIXME: Make this a hard error.. currently the configs have undefined struct names.. need to support that first :-(
       {
-        std::cerr << std::format<"WRN: Expected type for '{}.type', got '{}' | {}">(kv.key, *type_str, typ.error()) << std::endl;
+        println("WRN: Expected type for '{}.type', got '{}' | {}", kv.key, *type_str, typ.error());
         typ = Type { Type::Unknown };
       }
 
@@ -345,46 +348,46 @@ namespace config
   {
     auto topnode = root->get_node("dis86.text_section");
     if(!topnode)
-      return std::string("Failed to get the text_section node");
+      return "Failed to get the text_section node"s;
 
     for(const auto& kv : topnode->kv_arr)
     {
       auto ts_props = kv.as_node();
       if(!ts_props)
-        return std::string("Expected text_section properties");
+        return "Expected text_section properties"s;
 
       auto start_str = ts_props->get_str("start");
       if(!start_str)
-        return std::format<"No text_section 'start' property for '{}'">(kv.key);
+        return std::format("No text_section 'start' property for '{}'", kv.key);
 
       auto end_str = ts_props->get_str("end");
       if(!end_str)
-        return std::format<"No text_section 'end' property for '{}'">(kv.key);
+        return std::format("No text_section 'end' property for '{}'", kv.key);
 
       auto type_str = ts_props->get_str("type");
       if(!type_str)
-        return std::format<"No text_section 'type' property for '{}'">(kv.key);
+        return std::format("No text_section 'type' property for '{}'", kv.key);
 
       auto access_str = ts_props->get_str("access");
 
       auto start = SegOff_t::from_str(*start_str);
       if(start.is_err())
-        return std::format<"Expected segoff for '{}.start', got '{}' | {}">(kv.key, *start_str, start.error());
+        return std::format("Expected segoff for '{}.start', got '{}' | {}", kv.key, *start_str, start.error());
 
       auto end = SegOff_t::from_str(*end_str);
       if(end.is_err())
-        return std::format<"Expected segoff for '{}.end', got '{}' | {}">(kv.key, *end_str, end.error());
+        return std::format("Expected segoff for '{}.end', got '{}' | {}", kv.key, *end_str, end.error());
 
       auto typ = type_builder.parse_type(*type_str);
       if(typ.is_err())
-        return std::format<"Expected segoff for '{}.end', got '{}'">(kv.key, *type_str, typ.error());
+        return std::format("Expected segoff for '{}.end', got '{}'", kv.key, *type_str, typ.error());
 
       std::optional<SegOff_t> access;
       if(access_str)
       {
         auto val = SegOff_t::from_str(*access_str);
         if(val.is_err())
-          return std::format<"Expected segoff for '{}.access', got '{}' | {}">(kv.key, *access_str, val.error());
+          return std::format("Expected segoff for '{}.access', got '{}' | {}", kv.key, *access_str, val.error());
         access = *val;
       }
 

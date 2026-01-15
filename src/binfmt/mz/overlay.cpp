@@ -64,7 +64,7 @@ namespace overlay
     // };
 
     auto next_seg = 0;
-    for(size_t segnum = 0; segnum < seginfo.size(); ++segnum)
+    for(std::size_t segnum = 0; segnum < seginfo.size(); ++segnum)
     {
       auto& s = seginfo[segnum];
       // iterate all stubs
@@ -79,20 +79,20 @@ namespace overlay
 
       // unpack the actual stub code
       uint32_t* dat = exe_data + 16 * s.seg;
-      size_t sz = s.maxoff;
+      std::size_t sz = s.maxoff;
       assert(sz >= 32); // each hdr section is 32-bytes
       assert((sz-32) % 5 == 0); // each launcher entry is 5 bytes
-      size_t num_entries = (sz - 32) / 5;
+      std::size_t num_entries = (sz - 32) / 5;
 
       // get the seg struct
       CodeOverlaySeg* seg = reinterpret_cast<CodeOverlaySeg*>(dat);
       if(seg->interrupt_code != segment_interrupt_code)
-        return std::format<"Invalid seg interrupt code, got {} expected {}">(
+        return std::format("Invalid seg interrupt code, got {} expected {}", 
             print_array(seg->interrupt_code),
             print_array(segment_interrupt_code));
 
       if(seg->_zeros != segment_zeroes)
-        return std::format<"Zeros in seg aren't zero, got {} expected {}">(
+        return std::format("Zeros in seg aren't zero, got {} expected {}", 
             print_array(seg->_zeros),
             print_array(segment_zeroes));
 
@@ -108,23 +108,23 @@ namespace overlay
 
       // process each stub
       segment<CodeOverlayStub> stubs = { seg + 1, num_entries };
-      for(size_t i = 0; i < stubs.size(); ++i)
+      for(std::size_t i = 0; i < stubs.size(); ++i)
       {
         CodeOverlayStub& stub = stubs[i];
 
         if(stub.interrupt_code != stub_interrupt_code)
-          return std::format<"Invalid stub interrupt code, got {} expected {}">(
+          return std::format("Invalid stub interrupt code, got {} expected {}", 
               print_array(stub.interrupt_code),
               print_array(stub_interrupt_code));
 
         if(stub._zeros != stub_zeroes)
-          return std::format<"Zeros in stub aren't zero, got {} expected {}">(
+          return std::format("Zeros in stub aren't zero, got {} expected {}", 
               print_array(stub._zeros),
               print_array(stub_zeroes));
 
         if(stub.call_offset >= seg->seg_size)
         {
-          return std::format<"Stub call offset exceeds the segment size, offset {} segsize: {}">(
+          return std::format("Stub call offset exceeds the segment size, offset {} segsize: {}", 
               uint16_t(stub.call_offset),
               uint16_t(seg->seg_size));
         }

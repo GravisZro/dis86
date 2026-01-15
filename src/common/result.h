@@ -2,12 +2,17 @@
 #define RESULT_H
 
 #include <functional>
+#include <type_traits>
+
+template<typename T> struct deref { using type = T; };
+template<typename T> struct deref<T*> { using type = T; };
+
 
 template<typename Type, typename Err>
 class Result
 {
 public:
-  Result(Type t) : m_ok(true), m_value(t) { }
+  Result(Type v) : m_ok(true), m_value(v) { }
   Result(Err e) : m_ok(false), m_error(e) { }
 
   constexpr bool is_ok (void) { return m_ok; }
@@ -17,7 +22,10 @@ public:
   constexpr Type& value(void) { return m_value; }
   constexpr Err& error(void) { return m_error; }
 
-  constexpr Type& operator *(void) { return m_value; }
+  constexpr       Type& operator  *(void)       { return m_value; }
+  constexpr const Type& operator  *(void) const { return m_value; }
+  constexpr       Type  operator ->(void)       { return m_value; }
+  constexpr const Type  operator ->(void) const { return m_value; }
 
   template <typename R = bool>
   bool is_ok_and(const std::function<R(Type&)> &func, R rval = true)
@@ -34,7 +42,6 @@ public:
       return func(m_error) == rval;
     return false;
   }
-
 private:
   bool m_ok;
   Type m_value;

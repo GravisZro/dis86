@@ -1,11 +1,13 @@
 #include "decode.h"
 
-#include "instr_fmt.h"
-
 #include <format>
+
+#include "common/print.h"
+#include "instr_fmt.h"
 
 namespace decode
 {
+  using namespace std::string_literals;
   using namespace instr;
   using namespace region;
   using namespace instr_fmt;
@@ -40,7 +42,7 @@ namespace decode
       else
         return v.error();
     }
-    return std::format<"Invalid relative addressing size: {}">(to_str(sz));
+    return std::format("Invalid relative addressing size: {}", to_str(sz));
   }
 
 
@@ -96,7 +98,7 @@ namespace decode
     {
       if(sz == Size_e::Size8) { return operand_reg(Register_t::reg8(rm)); }
       else if(sz == Size_e::Size16) { return operand_reg(Register_t::reg16(rm)); }
-      else { return std::string("Only 8-bit and 16-bit registers are allowed"); }
+      else { return "Only 8-bit and 16-bit registers are allowed"s; }
     }
     else if(mode == 0 && rm == 6) // Direct addressing mode: 16-bit
       return operand_moff(bin, sz, prefix_sreg);
@@ -150,7 +152,7 @@ namespace decode
   {
     auto oper = operand_rm(bin, Size_e::Size8, modrm, sreg);
     if(oper.is_ok_and<bool>([](Operand_t& oper) { return oper == Operand_t::Mem; }, false))
-      return std::string("Register used where memory operand was required");
+      return "Register used where memory operand was required"s;
     return oper;
   }
 
@@ -158,7 +160,7 @@ namespace decode
   {
     auto oper = operand_rm(bin, Size_e::Size16, modrm, sreg);
     if(oper.is_ok_and<bool>([](Operand_t& oper) { return oper == Operand_t::Mem; }, false))
-      return std::string("Register used where memory operand was required");
+      return "Register used where memory operand was required"s;
     return oper;
   }
 
@@ -166,7 +168,7 @@ namespace decode
   {
     auto oper = operand_rm(bin, Size_e::Size32, modrm, sreg);
     if(oper.is_ok_and<bool>([](Operand_t& oper) { return oper == Operand_t::Mem; }, false))
-      return std::string("Register used where memory operand was required");
+      return "Register used where memory operand was required"s;
     return oper;
   }
 
@@ -229,24 +231,17 @@ namespace decode
 
     if(ret.is_err())
     {
-      uint8_t op1_val = *opcode1;
-      uint8_t op2_val = *opcode2;
-      return std::format<"Failed to find instruction fmt for opcode1={:02x}">(op1_val) +
-             std::format<", opcode2={:02x} at ">(op2_val) +
-             start_addr.to_str();
-      /*
-      return std::format<"Failed to find instruction fmt for opcode1={:02x}, opcode2={:02x} at {}">(
+      return std::format("Failed to find instruction fmt for opcode1={:02x}, opcode2={:02x} at {}",
           *opcode1,
           *opcode2,
-          start_addr.to_str().c_str());
-*/
+          start_addr.to_str());
     }
 
     // Unpack
     instruction_format_t& fmt = *ret;
 
     if(fmt.op == operation_e::INVAL)
-      return std::format<"Unsupported or invalid instruction at {}">(start_addr.to_str());
+      return std::format("Unsupported or invalid instruction at {}", start_addr.to_str());
 
     ins.opcode = fmt.op;
     ins.intel_hidden_operand_bitmask = fmt.hidden;
@@ -381,7 +376,6 @@ namespace decode
 #if ENABLE_TESTS
 #include <vector>
 #include <iostream>
-#include <unistd.h>
 #include "common/segment.h"
 #include "intel_syntax.h"
 
@@ -391,7 +385,7 @@ namespace decode
   {
     struct TestCase_t
     {
-      size_t addr;
+      std::size_t addr;
       std::vector<uint8_t> dat;
       std::string str;
     };
@@ -642,9 +636,9 @@ namespace decode
       { 0x0000, { 0x69, 0x01, 0x79, 0x01 },       "imul   ax,WORD PTR ds:[bx+di],0x179" },
     };
 
-    size_t good = 0;
+    std::size_t good = 0;
 
-    for (size_t i = 0; i < tests.size(); ++i)
+    for (std::size_t i = 0; i < tests.size(); ++i)
     {
       const TestCase_t& test = tests.at(i);
       SegOff_t addr { { Seg_t::Normal, 0 }, Off_t(test.addr) };
@@ -655,10 +649,7 @@ namespace decode
 
       auto val = decode::decode_one(bin);
       if(val.is_err())
-      {
-        std::cout << "error; \"" << val.error() << "\"" << std::endl;
-        std::cout.flush();
-      }
+        println("error; \"{}\"", val.error());
 
       assert(val.is_ok());
       auto& p = *val;
@@ -669,18 +660,16 @@ namespace decode
         std::string str = intel_syntax::format(addr, ins, bytes, false);
 
         if(str != test.str)
-          std::cout << std::format<"Failed ({}/{}) | Expected: '{}' | Got: '{}'\n\nRAW:\n{}">(i, tests.size(), test.str, str, ins.to_str())
-                    << std::endl;
+          println("Failed ({}/{}) | Expected: '{}' | Got: '{}'\n\nRAW:\n{}", i, tests.size(), test.str, str, ins.to_str());
         else
         {
           good++;
-          //std::cout << std::format<"Passed ({}/{}) | Decoded: '{}'">(i, tests.size(), test.str) << std::endl;
+          //println("Passed ({}/{}) | Decoded: '{}'", i, tests.size(), test.str);
         }
       }
     }
 
-    std::cout << std::format<"decode test passed/total: ({}/{})">(good, tests.size())
-              << std::endl;
+    println("decode test passed/total: ({}/{})", good, tests.size());
   }
 }
 #endif

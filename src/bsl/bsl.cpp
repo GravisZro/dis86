@@ -63,12 +63,12 @@ namespace bsl
     bool parse_keyval(keyval_t& out_kv);
 
     const char* buf;
-    size_t      sz;
-    size_t      idx;
+    std::size_t sz;
+    std::size_t idx;
 
     token_e     tok_type;
     const char* tok_buf;
-    size_t      tok_len;
+    std::size_t tok_len;
   };
 
   void parser_t::tok_next(void)
@@ -231,7 +231,7 @@ namespace bsl
       const char* end = ptr;
       while (end < eos && *end != '.')
         end++;
-      size_t len = end - ptr;
+      std::size_t len = end - ptr;
       node_e sub_type = node_e::invalid;
       auto val = node_get(node, std::string(ptr, len), sub_type);
       if (!val)
@@ -273,7 +273,7 @@ namespace bsl
   struct alignas(16) iter_impl_t
   {
     node_t* node;
-    size_t  idx;
+    std::size_t  idx;
     char    _extra[16];
   };
   static_assert(sizeof(iter_impl_t) == sizeof(iter_t), "");

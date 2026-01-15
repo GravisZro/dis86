@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <unistd.h>
 #include <string>
 
 #include "common/result.h"
@@ -44,8 +43,8 @@ namespace segoff
     Seg_t seg;
     Off_t off;
 
-    size_t abs_normal(void) const
-      { return size_t(seg.unwrap_normal()) + off; }
+    std::size_t abs_normal(void) const
+      { return std::size_t(seg.unwrap_normal()) + off; }
 
     bool is_overlay_addr(void) const { return seg == Seg_t::Overlay; }
 

@@ -1,5 +1,4 @@
 #pragma once
-#include <unistd.h>
 #include <optional>
 
 #include "common/segment.h"
@@ -20,9 +19,16 @@ namespace binfmt::mz
     segment<uint8_t> rawdata;
 
     segment<uint8_t> exe_data(void) const;
-    segment<uint8_t> overlay_data(size_t id) const;
-    size_t num_overlay_segments(void) const;
+    segment<uint8_t> overlay_data(std::size_t id) const;
+    std::size_t num_overlay_segments(void) const;
 
     static Result<Exe, std::string> decode(segment<uint8_t> data);
+
+    void print_hdr(void) const;
+    void print_relocs(segment<Reloc> relocs) const;
+    void print_fbov(FBOV* fbov) const;
+    void print_seginfo(segment<SegInfo> seginfo) const;
+    void print_overlayinfo(const overlay::OverlayInfo& ovr) const;
+    void print_exe(void) const;
   };
 }

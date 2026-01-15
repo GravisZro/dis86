@@ -1,7 +1,6 @@
 #pragma once
 #include <string>
 #include <cstdint>
-#include <unistd.h>
 
 #include "segoff.h"
 #include "common/segment.h"
@@ -14,9 +13,9 @@ namespace region
   struct RegionIter_t
   {
     segment<uint8_t> mem;
-    Seg_t  base_seg;
-    Off_t  base_off;
-    size_t off;
+    Seg_t       base_seg;
+    Off_t       base_off;
+    std::size_t off;
 
     RegionIter_t(segment<uint8_t> seg, const SegOff_t& segoff);
 
@@ -24,7 +23,7 @@ namespace region
     SegOff_t base_addr(void) const { return { base_seg, base_off }; }
     SegOff_t end_addr(void) const { return base_addr().add_offset(mem.size()); }
     SegOff_t addr(void) const { return base_addr().add_offset(off); }
-    size_t bytes_remaining(void) const { return mem.size() - off; }
+    std::size_t bytes_remaining(void) const { return mem.size() - off; }
 
     Result<uint8_t, std::string> get_checked(SegOff_t o_addr) const;
     Result<uint8_t, std::string> peek_checked(void) const
@@ -34,7 +33,7 @@ namespace region
     uint8_t peek(void) const { return get(addr()); }
 
     void advance(void) { off++; }
-    void advance_by(size_t n) { off += n; }
+    void advance_by(std::size_t n) { off += n; }
 
     segment<uint8_t> slice(SegOff_t addr, uint16_t len) const;
     Result<uint8_t, std::string> fetch(void);

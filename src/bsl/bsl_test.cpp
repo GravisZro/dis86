@@ -2,10 +2,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <unistd.h>
-#include <iostream>
 
 #include "bsl.h"
+#include "common/print.h"
 
 namespace bsl
 {  
@@ -70,7 +69,7 @@ namespace bsl
     std::shared_ptr<node_t> b = parse(data);
     get_pass(b, "foo", "bar");
     get_fail(b, "foo1");
-    std::cout << "BSL test 1: passed" << std::endl;
+    println("BSL test 1: passed");
   }
 
   static void test_2(void)
@@ -80,7 +79,7 @@ namespace bsl
     get_pass(b, "foo", "bar");
     get_pass(b, "good", "stuff");
     get_fail(b, "foo1");
-    std::cout << "BSL test 2: passed" << std::endl;
+    println("BSL test 2: passed");
   }
 
   static void test_3(void)
@@ -91,7 +90,7 @@ namespace bsl
     get_fail(b, "top.foo.baz");
     get_node_pass(b, "top.baz");
     get_pass(b, "top2", "r");
-    std::cout << "BSL test 3: passed" << std::endl;
+    println("BSL test 3: passed");
   }
 
   static void test_4(void)
@@ -101,7 +100,7 @@ namespace bsl
     get_pass(b, "top", "foo bar");
     get_pass(b, "bot", "g");
     get_pass(b, "quote", "{ key val }");
-    std::cout << "BSL test 4: passed" << std::endl;
+    println("BSL test 4: passed");
   }
 
   void test(void)

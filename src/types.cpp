@@ -3,6 +3,8 @@
 #include <cassert>
 namespace types
 {
+  using namespace std::string_literals;
+
   bool Type::is_primitive(void) const
   {
     return type == type_e::Void ||
@@ -15,7 +17,7 @@ namespace types
            type == type_e::Unknown;
   }
 
-  std::optional<size_t> Type::size_in_bytes(void) const
+  std::optional<std::size_t> Type::size_in_bytes(void) const
   {
     switch(type)
     {
@@ -63,7 +65,7 @@ namespace types
         }
       case type_e::Ptr:
       case type_e::Struct:
-        return std::format<"struct_id_{}">(structref.idx);
+        return std::format("struct_id_{}", structref.idx);
       case type_e::Unknown:
         return "?unknown_type?";
     }
@@ -102,21 +104,21 @@ namespace types
       return basetypes.at(s);
     auto v = parse_array_type(s);
     if(v.is_err())
-      return std::format<"Failed to parse type: '{}'\n">(s) + "Error: " + v.error();
+      return std::format("Failed to parse type: '{}' | Error: {}", s, v.error());
     return v.value();
   }
 
 
   Result<Type, std::string> Builder::parse_array_type(const std::string& s) const
   {
-    size_t array_start = s.find('[');
-    size_t array_end = s.find(']', array_start);
+    std::size_t array_start = s.find('[');
+    std::size_t array_end = s.find(']', array_start);
     if(array_start == std::string::npos)
-      return std::string("No opening an array bracket");
+      return "No opening an array bracket"s;
     if(array_end == std::string::npos)
-      return std::string("No closing an array bracket");
+      return "No closing an array bracket"s;
     if(array_end != s.size() - 1)
-      return std::string("Array closing bracket isn't at the end of the type");
+      return "Array closing bracket isn't at the end of the type"s;
 
     std::string base_str = s.substr(0, array_start);
     std::string size_str = s.substr(array_start + 1, array_end);
@@ -125,12 +127,12 @@ namespace types
     if(base.is_err())
       return base.error();
     std::shared_ptr<Type> base_type = std::make_shared<Type>(base.value());
-    std::optional<size_t> sz;
+    std::optional<std::size_t> sz;
     if(!size_str.empty())
     {
       try { sz = std::stoul(size_str, nullptr, 0); }
       catch (...)
-        { return std::string("Cannot parse array size: ") + size_str; }
+        { return "Cannot parse array size: "s + size_str; }
     }
     if(!sz)
       return { Type::array_t { base_type, ArraySize { false, 0 } } };

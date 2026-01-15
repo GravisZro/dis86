@@ -5,6 +5,7 @@
 
 namespace region
 {
+  using namespace std::string_literals;
   using namespace segoff;
 
   RegionIter_t::RegionIter_t(segment<uint8_t> seg, const SegOff_t& segoff)
@@ -23,11 +24,11 @@ namespace region
   Result<uint8_t, std::string> RegionIter_t::get_checked(SegOff_t o_addr) const
   {
     if (o_addr.seg != base_seg)
-      return std::string("Mismatching segments");
+      return "Mismatching segments"s;
     if(o_addr.off < base_off)
-      return std::string("RegionIter access below start of region");
+      return "RegionIter access below start of region"s;
     if(o_addr.off >= base_off + mem.size())
-      return std::string("RegionIter access beyond end of region");
+      return "RegionIter access beyond end of region"s;
     return mem[o_addr.off - base_off];
   }
 
@@ -78,7 +79,8 @@ namespace region
 
 #ifdef ENABLE_TESTS
 #include <cassert>
-#include <iostream>
+#include "common/print.h"
+
 namespace region
 {
   void test(void)
@@ -101,7 +103,7 @@ namespace region
     {
       auto v = b.fetch();
       if(v.is_err())
-        std::cout << v.error() << std::endl;
+        println(v.error());
       assert(v.value() == 0x34);
     }
     assert(b.peek() == 0x56);
@@ -109,12 +111,12 @@ namespace region
     {
       auto v = b.fetch_u16();
       if(v.is_err())
-        std::cout << v.error() << std::endl;
+        println(v.error());
       assert(v.value() == 0x7856);
     }
 
     assert(b.peek() == 0x9a);
-    std::cout << "region test passed" << std::endl;
+    println("region test passed");
   }
 }
 #endif

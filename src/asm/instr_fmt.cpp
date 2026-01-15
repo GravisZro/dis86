@@ -447,7 +447,7 @@ namespace instr_fmt
 #if ENABLE_TESTS
 
 #include <cassert>
-#include <iostream>
+#include "common/print.h"
 namespace instr_fmt
 {
   void test(void)
@@ -456,7 +456,7 @@ namespace instr_fmt
     assert(lookup(0x05, 0x05).is_err_and<bool>([](auto& err) { return err == Error::NotFound; }));
     assert(lookup(0x80, {}).is_err_and<bool>([](auto& err) { return err == Error::NeedOpcode2; }));
     assert(lookup(0x80, 0x01).is_ok_and<bool>([](auto& fmt) { return fmt.op == operation_e::OR; }));
-    std::cout << "instr_fmt tests passed" << std::endl;
+    println("instr_fmt tests passed");
   }
 }
 

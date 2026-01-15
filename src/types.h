@@ -1,9 +1,6 @@
 #pragma once
 
-//#include "config.h"
-
 #include <cstdint>
-#include <unistd.h>
 
 #include <format>
 #include <unordered_map>
@@ -18,14 +15,14 @@ namespace types
 
   struct StructRef
   {
-    size_t idx;
-    uint16_t size;
+    std::size_t idx;
+    uint16_t    size;
   };
 
   struct ArraySize
   {
-    bool   known = false;
-    size_t value = 0;
+    bool        known = false;
+    std::size_t value = 0;
   };
 
   struct Type
@@ -66,7 +63,7 @@ namespace types
     StructRef structref;
 
     bool is_primitive(void) const;
-    std::optional<size_t> size_in_bytes(void) const;
+    std::optional<std::size_t> size_in_bytes(void) const;
 
     std::string to_str(void) const;
   };
