@@ -15,7 +15,7 @@ project(${TARGET_NAME}
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED OFF)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # output name
 add_executable(${TARGET_NAME})
@@ -65,6 +65,20 @@ set(ASM_SOURCES
   src/asm/intel_syntax.cpp
 )
 
+set(BINFMT_HEADERS
+  src/binfmt/mz/defs.h
+  src/binfmt/mz/exe.h
+  src/binfmt/mz/overlay.h
+  src/binfmt/mz/print.h
+)
+
+set(BINFMT_SOURCES
+  src/binfmt/mz/exe.cpp
+  src/binfmt/mz/overlay.cpp
+  src/binfmt/mz/print.cpp
+)
+
+
 
 set(HEADERS
   src/bsl/bsl.h
@@ -103,6 +117,7 @@ target_sources(${TARGET_NAME} PUBLIC
   ${COMMON_HEADERS} ${COMMON_SOURCES}
   ${HEADERS} ${SOURCES}
   ${ASM_HEADERS} ${ASM_SOURCES}
+  ${BINFMT_HEADERS} ${BINFMT_SOURCES}
 
   ${TEST_SOURCES}
 )
