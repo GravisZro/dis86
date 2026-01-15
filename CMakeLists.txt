@@ -69,13 +69,11 @@ set(BINFMT_HEADERS
   src/binfmt/mz/defs.h
   src/binfmt/mz/exe.h
   src/binfmt/mz/overlay.h
-  src/binfmt/mz/print.h
 )
 
 set(BINFMT_SOURCES
   src/binfmt/mz/exe.cpp
   src/binfmt/mz/overlay.cpp
-  src/binfmt/mz/print.cpp
 )
 
 
