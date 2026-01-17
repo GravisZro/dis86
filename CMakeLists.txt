@@ -77,6 +77,21 @@ set(BINFMT_SOURCES
   src/binfmt/mz/overlay.cpp
 )
 
+set(IR_HEADERS
+  src/util/dvec.h
+  src/ir/opcode.h
+  src/ir/defs.h
+  src/ir/sym.h
+  src/ir/ir.h
+)
+
+set(IR_SOURCES
+  src/util/dvec.cpp
+  src/ir/opcode.cpp
+  src/ir/defs.cpp
+  src/ir/sym.cpp
+  src/ir/ir.cpp
+)
 
 
 set(HEADERS
@@ -121,6 +136,6 @@ target_sources(${TARGET_NAME} PUBLIC
   ${HEADERS} ${SOURCES}
   ${ASM_HEADERS} ${ASM_SOURCES}
   ${BINFMT_HEADERS} ${BINFMT_SOURCES}
-
+  ${IR_HEADERS} ${IR_SOURCES}
   ${TEST_SOURCES}
 )

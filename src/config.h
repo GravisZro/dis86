@@ -11,7 +11,7 @@
 namespace config
 {
   using namespace segoff;
-  using instr::Register_t;
+  using bin::instr::Register_t;
   using namespace types;
 
   enum CallMode

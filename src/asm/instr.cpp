@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-namespace instr
+namespace bin::instr
 {
   Register_t::e Register_t::reg8(uint8_t num)
   {
@@ -93,7 +93,7 @@ namespace instr
       }
     };
 
-  std::string_view to_str(Size_e val)
+  std::string_view to_string(Size_e val)
   {
     switch(val)
     {
@@ -104,7 +104,7 @@ namespace instr
     }
   }
 
-  std::string Instruction_t::to_str(void) const
+  std::string Instruction_t::to_string(void) const
   {
     assert(false); // TODO
     return "";

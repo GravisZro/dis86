@@ -6,7 +6,7 @@
 #include "region.h"
 
 
-namespace decode
+namespace bin::decode
 {
   using namespace instr;
   using namespace region;

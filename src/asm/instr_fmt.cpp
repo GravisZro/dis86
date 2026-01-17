@@ -1,6 +1,8 @@
 #include "instr_fmt.h"
 
-namespace instr_fmt
+#include <cassert>
+
+namespace bin::instr_fmt
 {
   constexpr uint8_t DNE = UINT8_MAX;
 
@@ -378,38 +380,42 @@ namespace instr_fmt
     }
   };
 
-
-  const std::array<std::string, 110> instr_op_mneumonic =
+  std::string_view to_string(operation_e v)
   {
-      "aaa",    "aas",    "adc",    "add",
-      "and",    "call",   "callf",  "cbw",
-      "clc",    "cld",    "cli",    "cmc",
-      "cmp",    "cmps",   "cwd",    "daa",
-      "das",    "dec",    "div",    "enter",
-      "hlt",    "imul",   "imul",   "in",
-      "inc",    "ins",    "int",    "into",
-      "inval",  "iret",   "ja",     "jae",
-      "jb",     "jbe",    "jcxz",   "je",
-      "jg",     "jge",    "jl",     "jle",
-      "jmp",    "jmpf",   "jne",    "jno",
-      "jnp",    "jns",    "jo",     "jp",
-      "js",     "lahf",   "lds",    "lea",
-      "leave",  "les",    "lods",   "loop",
-      "loope",  "loopne", "mov",    "movs",
-      "mul",    "neg",    "nop",    "not",
-      "or",     "out",    "outs",   "pop",
-      "popa",   "popf",   "push",   "pusha",
-      "pushf",  "rcl",    "rcr",    "ret",
-      "retf",   "rol",    "ror",    "sahf",
-      "sar",    "sbb",    "scas",   "seto",
-      "setno",  "setb",   "setae",  "sete",
-      "setne",  "setbe",  "seta",   "sets",
-      "setns",  "setp",   "setnp",  "setl",
-      "setge",  "setle",  "setg",   "shl",
-      "shr",    "stc",    "std",    "sti",
-      "stos",   "sub",    "test",   "xchg",
-      "xlat",   "xor",
-  };
+    const std::array<std::string_view, 110> strs =
+    {
+        "aaa",    "aas",    "adc",    "add",
+        "and",    "call",   "callf",  "cbw",
+        "clc",    "cld",    "cli",    "cmc",
+        "cmp",    "cmps",   "cwd",    "daa",
+        "das",    "dec",    "div",    "enter",
+        "hlt",    "imul",   "imul",   "in",
+        "inc",    "ins",    "int",    "into",
+        "inval",  "iret",   "ja",     "jae",
+        "jb",     "jbe",    "jcxz",   "je",
+        "jg",     "jge",    "jl",     "jle",
+        "jmp",    "jmpf",   "jne",    "jno",
+        "jnp",    "jns",    "jo",     "jp",
+        "js",     "lahf",   "lds",    "lea",
+        "leave",  "les",    "lods",   "loop",
+        "loope",  "loopne", "mov",    "movs",
+        "mul",    "neg",    "nop",    "not",
+        "or",     "out",    "outs",   "pop",
+        "popa",   "popf",   "push",   "pusha",
+        "pushf",  "rcl",    "rcr",    "ret",
+        "retf",   "rol",    "ror",    "sahf",
+        "sar",    "sbb",    "scas",   "seto",
+        "setno",  "setb",   "setae",  "sete",
+        "setne",  "setbe",  "seta",   "sets",
+        "setns",  "setp",   "setnp",  "setl",
+        "setge",  "setle",  "setg",   "shl",
+        "shr",    "stc",    "std",    "sti",
+        "stos",   "sub",    "test",   "xchg",
+        "xlat",   "xor",
+    };
+    assert(static_cast<uint8_t>(v) < strs.size());
+    return strs.at(static_cast<uint8_t>(v));
+  }
 
 
   Result<instruction_format_t, Error> lookup(uint8_t opcode1, std::optional<uint8_t> opcode2)
@@ -445,10 +451,8 @@ namespace instr_fmt
 }
 
 #if ENABLE_TESTS
-
-#include <cassert>
 #include "common/print.h"
-namespace instr_fmt
+namespace bin::instr_fmt
 {
   void test(void)
   {

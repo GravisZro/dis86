@@ -65,7 +65,7 @@ namespace types
     bool is_primitive(void) const;
     std::optional<std::size_t> size_in_bytes(void) const;
 
-    std::string to_str(void) const;
+    std::string to_string(void) const;
   };
 
   struct StructMember

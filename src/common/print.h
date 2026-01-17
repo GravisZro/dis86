@@ -20,6 +20,22 @@ void print(std::string_view fmt, Args... args)
 }
 
 template<typename... Args>
+void eprintln(std::string_view fmt, Args... args)
+{
+  std::cerr << std::format(fmt, args...) << std::endl;
+  std::cerr.flush();
+}
+
+template<typename... Args>
+void eprint(std::string_view fmt, Args... args)
+{
+  std::cerr << std::format(fmt, args...);
+  std::cerr.flush();
+}
+
+
+
+template<typename... Args>
 void panic(std::string_view fmt, Args... args)
 {
   println(fmt, args...);

@@ -39,7 +39,7 @@ namespace segoff
     return std::format("Invalid segoff: '{}'", s);
   }
 
-  std::string SegOff_t::to_str(void) const
+  std::string SegOff_t::to_string(void) const
   {
     if(seg == Seg_t::Normal)
       return std::format("{:04x}:", seg.unwrap_normal()) + std::format("{:04x}", off);

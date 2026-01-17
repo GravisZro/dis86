@@ -55,7 +55,7 @@ namespace segoff
 
     static Result<SegOff_t, std::string> from_str(std::string s);
 
-    std::string to_str(void) const;
+    std::string to_string(void) const;
 
     bool operator > (const SegOff_t& o) const { return seg > o.seg || (seg == o.seg && off > o.off); }
     bool operator < (const SegOff_t& o) const { return seg < o.seg || (seg == o.seg && off < o.off); }

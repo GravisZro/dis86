@@ -7,10 +7,10 @@
 #include "segoff.h"
 
 
-namespace instr
+namespace bin::instr
 {
   using namespace segoff;
-  using namespace instr_fmt;
+  using namespace bin::instr_fmt;
 
   enum class Rep_e
   {
@@ -25,7 +25,7 @@ namespace instr
     Size32,
   };
 
-  std::string_view to_str(Size_e val);
+  std::string_view to_string(Size_e val);
 
   struct RegInfo_t
   {
@@ -45,7 +45,7 @@ namespace instr
       AH,  CH,  DH,  BH,
       ES,  CS,  SS,  DS,
       IP,  FLAGS,
-    } value = AX;
+    } value;
 
     Register_t(e v = AX) : value(v) { }
     Register_t(uint16_t v) : value(e(v)) { }
@@ -61,6 +61,7 @@ namespace instr
     static std::optional<e> from_str_upper(const std::string& str);
   };
   static_assert(sizeof(Register_t) == 1);
+
 
   struct OperandReg_t
   {
@@ -135,6 +136,6 @@ namespace instr
     SegOff_t rel_addr(OperandRel_t rel) const
       { return end_addr().add_offset(rel.val); }
 
-    std::string to_str(void) const;
+    std::string to_string(void) const;
   };
 }

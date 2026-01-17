@@ -42,7 +42,7 @@ namespace types
     return {};
   }
 
-  std::string Type::to_str(void) const
+  std::string Type::to_string(void) const
   {
     switch(type)
     {
@@ -57,7 +57,7 @@ namespace types
       case type_e::Array:
         {
           assert(array.typ);
-          std::string val = array.typ->to_str() + "[";
+          std::string val = array.typ->to_string() + "[";
           if(array.sz.known)
             val += std::to_string(array.sz.value);
           val += "]";

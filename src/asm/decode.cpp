@@ -5,12 +5,12 @@
 #include "common/print.h"
 #include "instr_fmt.h"
 
-namespace decode
+namespace bin::decode
 {
   using namespace std::string_literals;
-  using namespace instr;
+  using namespace bin::instr;
   using namespace region;
-  using namespace instr_fmt;
+  using namespace bin::instr_fmt;
 
 
   Result<Operand_t, std::string> operand_reg(Register_t r)
@@ -42,7 +42,7 @@ namespace decode
       else
         return v.error();
     }
-    return std::format("Invalid relative addressing size: {}", to_str(sz));
+    return std::format("Invalid relative addressing size: {}", to_string(sz));
   }
 
 
@@ -234,14 +234,14 @@ namespace decode
       return std::format("Failed to find instruction fmt for opcode1={:02x}, opcode2={:02x} at {}",
           *opcode1,
           *opcode2,
-          start_addr.to_str());
+          start_addr.to_string());
     }
 
     // Unpack
     instruction_format_t& fmt = *ret;
 
     if(fmt.op == operation_e::INVAL)
-      return std::format("Unsupported or invalid instruction at {}", start_addr.to_str());
+      return std::format("Unsupported or invalid instruction at {}", start_addr.to_string());
 
     ins.opcode = fmt.op;
     ins.intel_hidden_operand_bitmask = fmt.hidden;
@@ -379,7 +379,7 @@ namespace decode
 #include "common/segment.h"
 #include "intel_syntax.h"
 
-namespace decode
+namespace bin::decode
 {
   void test(void)
   {
@@ -660,7 +660,7 @@ namespace decode
         std::string str = intel_syntax::format(addr, ins, bytes, false);
 
         if(str != test.str)
-          println("Failed ({}/{}) | Expected: '{}' | Got: '{}'\n\nRAW:\n{}", i, tests.size(), test.str, str, ins.to_str());
+          println("Failed ({}/{}) | Expected: '{}' | Got: '{}'\n\nRAW:\n{}", i, tests.size(), test.str, str, ins.to_string());
         else
         {
           good++;

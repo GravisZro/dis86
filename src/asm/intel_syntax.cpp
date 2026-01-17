@@ -5,7 +5,7 @@
 #include <format>
 #include <bit>
 
-namespace intel_syntax
+namespace bin::intel_syntax
 {
   using namespace instr;
   using namespace segoff;
@@ -75,7 +75,7 @@ namespace intel_syntax
   {
     if(with_detail)
     {
-      s += std::format("{}:\t", ins.addr.to_str());
+      s += std::format("{}:\t", ins.addr.to_string());
       for(std::size_t i = 0; i < bytes.size(); i++)
         s += std::format("{:#02x} ", bytes[i]);
       std::size_t used = bytes.size() * 3;
@@ -92,7 +92,7 @@ namespace intel_syntax
         s += "rep ";
     }
 
-    s += std::format("{:<5}", instr_op_mneumonic.at(uint8_t(ins.opcode)));
+    s += std::format("{:<5}", to_string(ins.opcode));
     bool first = true;
     for(uint8_t i = 0; i < 3 && ins.operands[i].type != Operand_t::None; i++)
     {
@@ -113,7 +113,7 @@ namespace intel_syntax
   {
     if(with_detail)
     {
-      s += std::format("{}:\t", addr.to_str());
+      s += std::format("{}:\t", addr.to_string());
       for(std::size_t i = 0; i < bytes.size(); i++)
         s += std::format("{:#02x} ", bytes[i]);
       std::size_t used = bytes.size() * 3;

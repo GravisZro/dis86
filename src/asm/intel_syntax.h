@@ -7,9 +7,9 @@
 #include "segoff.h"
 
 
-namespace intel_syntax
+namespace bin::intel_syntax
 {
-  using namespace instr;
+  using namespace bin::instr;
   using namespace segoff;
 
   void format_operand(std::string& s, Instruction_t& ins, Operand_t oper);

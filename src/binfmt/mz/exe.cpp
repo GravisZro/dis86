@@ -104,7 +104,7 @@ namespace binfmt::mz
 
   //==== print functions below ====
 
-  static std::string to_str(SegInfoType typ)
+  static std::string to_string(SegInfoType typ)
   {
     switch (typ)
     {
@@ -175,7 +175,7 @@ namespace binfmt::mz
     for(std::size_t i = 0; i < seginfo.size(); ++i)
     {
       SegInfo& s = seginfo[i];
-      std::string typ_str = std::format("{}({})", to_str(s.typ), int(s.typ));
+      std::string typ_str = std::format("{}({})", to_string(s.typ), int(s.typ));
       println(" {:4}   0x{:04x}    {:<12}  0x{:04x}    0x{:04x}    {:5} (0x{:04x})",
                i, s.seg, typ_str, s.minoff, s.maxoff, s.size(), s.size());
     }
@@ -200,7 +200,7 @@ namespace binfmt::mz
 
     println("Overlay Stubs:");
     for(const auto& stub : ovr.stubs)
-      println("  {} => {}", stub.stub_addr().to_str(), stub.dest_addr().to_str());
+      println("  {} => {}", stub.stub_addr().to_string(), stub.dest_addr().to_string());
   }
 
   void Exe::print_exe(void) const

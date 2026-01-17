@@ -4,9 +4,10 @@
 
 #include <array>
 #include <string>
+#include <string_view>
 #include <optional>
 
-namespace instr_fmt
+namespace bin::instr_fmt
 {
   enum class operand_e : uint8_t
   {
@@ -98,6 +99,7 @@ namespace instr_fmt
     XLAT,   XOR,
   };
 
+  extern std::string_view to_string(operation_e value);
 
   enum class Error
   {
@@ -136,6 +138,4 @@ namespace instr_fmt
   };
 
   Result<instruction_format_t, Error> lookup(uint8_t opcode1, std::optional<uint8_t> opcode2);
-  extern std::array<instruction_format_t, 367> instr_tbl;
-  extern const std::array<std::string, 110> instr_op_mneumonic;
 }
